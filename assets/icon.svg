@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Semester grade calculator">
+  <rect width="512" height="512" rx="96" fill="#e8f0fe"/>
+  <path d="M128 104h256a28 28 0 0 1 28 28v248a28 28 0 0 1-28 28H128a28 28 0 0 1-28-28V132a28 28 0 0 1 28-28Z" fill="#ffffff" stroke="#1a73e8" stroke-width="20"/>
+  <path d="M166 182h180M166 246h90" stroke="#1a73e8" stroke-width="24" stroke-linecap="round"/>
+  <path d="m285 324 32 30 60-76" fill="none" stroke="#188038" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

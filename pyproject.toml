@@ -1,0 +1,26 @@
+[project]
+name = "semester-grade-calculator"
+version = "1.0.0"
+description = "Calculate weighted semester scores and GPA grades."
+requires-python = ">=3.12"
+authors = [
+    { name = "jiayi-zhu", email = "zhuj7055@gmail.com" }
+]
+dependencies = [
+    "flet"
+]
+
+[dependency-groups]
+dev = [
+    "flet-cli",
+    "flet-desktop",
+    "flet-web"
+]
+
+[tool.flet.metadata]
+title = "Semester Grade Calculator"
+
+[tool.flet]
+org = "dev.flet"
+company = "jiayi-zhu"
+copyright = "Copyright (C) 2026 by jiayi-zhu"
