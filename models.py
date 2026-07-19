@@ -1,4 +1,14 @@
-"""Pure grade-calculation logic."""
+"""Pure grade-calculation logic and app data."""
+
+
+SHORTCUTS = [
+    ("空大首頁", "https://www.nou.edu.tw/"),
+    ("數位學習平台", "https://uu.nou.edu.tw/mooc/index.php"),
+    ("教務行政資訊系統", "https://noustud.nou.edu.tw/"),
+    ("空大出版中心", "https://www2.nou.edu.tw/pd/index.aspx"),
+    ("空大教務處", "https://studadm.nou.edu.tw/"),
+    ("空大視訊面授教室", "https://vc.nou.edu.tw/")
+]
 
 
 def grade_details(total: float) -> tuple[float, str, float, bool]:
