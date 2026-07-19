@@ -1,6 +1,7 @@
 import flet as ft
 
 from models import (
+    SHORTCUTS,
     calculate_average_grade,
     calculate_gpa_43,
     calculate_grade,
@@ -41,16 +42,80 @@ class GradeCalculator(ft.Column):
             for number in range(1, 6)
         ]
         self.result = ft.Text("請選擇計算方式並輸入成績後計算。")
+        calculator_controls = [
+            ft.Text("空大學期成績計算器（權重版）"),
+            self.semester,
+            self.regular,
+            self.midterm,
+            self.final,
+            *self.average_scores,
+            ft.Row(
+                controls=[
+                    ft.Button(
+                        content="計算學期成績",
+                        bgcolor="#0066CC",
+                        color="#FFFFFF",
+                        on_click=self.calculate,
+                    ),
+                    ft.Button(content="Reset", on_click=self.reset),
+                ]
+            ),
+            self.result,
+        ]
+        shortcut_controls = [
+            ft.Text("常用網頁"),
+            *[
+                ft.Button(
+                    content=name,
+                    url=url or None,
+                    width=180,
+                    height=48,
+                    bgcolor=(
+                        "#E6FFFA"
+                        if name == "空大首頁"
+                        else "#EBF8FF"
+                        if name == "數位學習平台"
+                        else "#EDF2F7"
+                        if name == "教務行政資訊系統"
+                        else "#FEFCBF"
+                        if name == "空大出版中心"
+                        else "#FFF5F5"
+                        if name == "空大教務處"
+                        else "#F3E8FF"
+                        if name == "空大視訊面授教室"
+                        else None             
+                    ),
+                    color=(
+                        "#006D5B"
+                        if name == "空大首頁"
+                        else "#2B6CB0"
+                        if name == "數位學習平台"
+                        else "#4A5568"
+                        if name == "教務行政資訊系統"
+                        else "#744210"
+                        if name == "空大出版中心"        
+                        else "#9B2C2C"
+                        if name == "空大教務處"
+                        else "#6B21A8"
+                        if name == "空大視訊面授教室"
+                        else None                        
+                    ),
+                )
+                for name, url in SHORTCUTS
+            ],
+        ]
         super().__init__(
             controls=[
-                ft.Text("空大學期成績計算器（權重版）"),
-                self.semester,
-                self.regular,
-                self.midterm,
-                self.final,
-                *self.average_scores,
-                ft.Button(content="計算學期成績", on_click=self.calculate),
-                self.result,
+                ft.Row(
+                    controls=[
+                        ft.Column(controls=calculator_controls, expand=1),
+                        ft.Column(
+                            controls=shortcut_controls,
+                            expand=1,
+                            spacing=20,
+                        ),
+                    ]
+                )
             ]
         )
 
@@ -66,6 +131,15 @@ class GradeCalculator(ft.Column):
             score.visible = is_average
         self.result.value = "請輸入成績後計算。"
         self.page.update()
+
+    def reset(self, _):
+        self.semester.value = "non_summer"
+        self.regular.value = ""
+        self.midterm.value = ""
+        self.final.value = ""
+        for score in self.average_scores:
+            score.value = ""
+        self.change_semester(None)
 
     def calculate(self, _):
         try:
