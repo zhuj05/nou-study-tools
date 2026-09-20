@@ -5,6 +5,9 @@ from views.calculator import GradeCalculator
 
 def main(page: ft.Page):
     page.title = "Semester Grade Calculator(學生自行開發，非官方)"
+    page.scroll = ft.ScrollMode.AUTO
+    page.theme_mode = ft.ThemeMode.LIGHT
+    page.bgcolor = "#F8F9FA"
     page.add(GradeCalculator())
 
 
