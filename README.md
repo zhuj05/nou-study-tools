@@ -1,5 +1,5 @@
 # nou-study-tools
-©2026 朱家儀.All Rights Reserved.
+
 
 Unofficial
 
@@ -50,5 +50,6 @@ Unofficial
 • 新增日程記錄匯出功能
 
 —
+Copyright © 2026 朱家儀 All Rights Reserved.
 開發者：空大學生 朱家儀
-（非學校官方系統，純同學交流互助分享，完全免費，歡迎需要的同學多加利用與轉發！）
+（非學校官方系統，純同學交流互助分享，完全免費，歡迎需要的同學多加利用！）
