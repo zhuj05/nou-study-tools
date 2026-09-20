@@ -1,4 +1,5 @@
 # nou-study-tools
+©2026 朱家儀.All Rights Reserved.
 
 Unofficial
 
