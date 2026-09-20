@@ -34,7 +34,7 @@ jobs:
 
       - name: Build Web App
         run: |
-          python -m flet build web --base-url /nou-study-tools/ --route-url-strategy hash
+          flet build web --base-url /nou-study-tools/
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v4
