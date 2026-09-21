@@ -43,7 +43,7 @@ jobs:
           flet build web --base-url /nou-study-tools/ --yes
 
       - name: Upload Pages Artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: build/web
 
