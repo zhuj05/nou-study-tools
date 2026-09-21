@@ -51,6 +51,7 @@ async def set_clipboard_universal(page: ft.Page, text: str) -> bool:
 
 from models import (
     SHORTCUTS,
+    build_academic_calendar_view,
     calculate_average_grade,
     calculate_gpa_43,
     calculate_grade,
@@ -82,6 +83,7 @@ class GradeCalculator(ft.Column):
                 ft.DropdownOption(key="non_summer", text="非暑修"),
                 ft.DropdownOption(key="semester_average", text="計算學期總成績平均"),
                 ft.DropdownOption(key="exam_hw_tracker", text="考試與作業日期紀錄"),
+                ft.DropdownOption(key="academic_calendar", text="重要行事曆日程"),
             ],
             on_select=self.change_semester,
         )
@@ -206,6 +208,9 @@ class GradeCalculator(ft.Column):
             ],
         )
 
+        # 重要行事曆檢視容器（預設隱藏）
+        self.calendar_panel = ft.Container(visible=False)
+
         self.result = ft.Text(
             "請選擇計算方式並輸入成績後計算。",
             size=15,
@@ -309,6 +314,7 @@ class GradeCalculator(ft.Column):
                 self.input_card(self.final),
                 *self.average_rows,
                 self.tracker_panel,
+                self.calendar_panel,
                 self.action_buttons,
                 self.result_box,
                 ft.Row(
@@ -393,10 +399,11 @@ class GradeCalculator(ft.Column):
                             content=ft.Column(
                                 spacing=10,
                                 controls=[
-                                    ft.Text("⭐ 4 大核心功能（點上方功能下拉選單切換）：", weight=ft.FontWeight.BOLD, size=15 + d, color="#3B82F6"),
+                                    ft.Text("⭐ 5 大核心功能（點上方功能下拉選單切換）：", weight=ft.FontWeight.BOLD, size=15 + d, color="#3B82F6"),
                                     ft.Text("• 學期平均計算：最多可算 7 科，右側填入學分數即可加權計算（沒修滿 7 科直接留空）。", size=14 + d, color=text_color),
                                     ft.Text("• 單科分數計算：支援一般學期（非暑修）與暑修配分計算。", size=14 + d, color=text_color),
                                     ft.Text("• 考試／作業日程記錄：支援考試第 1~6 節與線上測驗／報告截止時間快速套用、單科獨立清空，可一鍵匯出至 LINE 筆記本或 Excel 檔！", size=14 + d, color=text_color),
+                                    ft.Text("• 重要行事曆日程：支援 115 上、115 下、115 暑期關鍵時程一鍵切換查詢，重要日子不再漏掉。", size=14 + d, color=text_color),
                                     ft.Text("• 常用校園連結：整合至畫面下方（可展開），一鍵直達空大首頁、數位學習平台、教務系統、視訊面授教室、出版中心、教務處、學習指導中心及行事曆。", size=14 + d, color=text_color),
                                 ],
                             ),
@@ -422,6 +429,7 @@ class GradeCalculator(ft.Column):
                                 spacing=8,
                                 controls=[
                                     ft.Text("✨ 近期更新亮點：", weight=ft.FontWeight.BOLD, size=15 + d, color="#F59E0B"),
+                                    ft.Text("• 新增 115 學年度重要行事曆日程查詢（水平按鈕快速切換學期）", size=14 + d, color=text_color),
                                     ft.Text("• 新增單科獨立清空功能（重填更自由不誤觸）", size=14 + d, color=text_color),
                                     ft.Text("• 支援字體放大縮小功能（長輩閱讀更輕鬆）", size=14 + d, color=text_color),
                                     ft.Text("• 畫面瘦身：預設顯示 3 科，手機閱讀不再冗長", size=14 + d, color=text_color),
@@ -1092,8 +1100,9 @@ class GradeCalculator(ft.Column):
         is_summer = mode == "summer"
         is_average = mode == "semester_average"
         is_tracker = mode == "exam_hw_tracker"
+        is_calendar = mode == "academic_calendar"
 
-        is_grade_calc = not is_tracker and not is_average
+        is_grade_calc = not is_tracker and not is_average and not is_calendar
         self.regular.visible = is_grade_calc
         self.midterm.visible = is_grade_calc and not is_summer
         self.final.visible = is_grade_calc
@@ -1103,11 +1112,20 @@ class GradeCalculator(ft.Column):
             row.visible = is_average
 
         self.tracker_panel.visible = is_tracker
-        self.action_buttons.visible = not is_tracker
-        self.result_box.visible = not is_tracker
+
+        # 當切換到行事曆時動態載入元件
+        if is_calendar:
+            self.calendar_panel.content = build_academic_calendar_view(self.page)
+            self.calendar_panel.visible = True
+        else:
+            self.calendar_panel.visible = False
+
+        # 行事曆或作業紀錄模式下隱藏算分按鈕與成績卡片
+        self.action_buttons.visible = not is_tracker and not is_calendar
+        self.result_box.visible = not is_tracker and not is_calendar
 
         self.clear_all_errors()
-        if not is_tracker:
+        if not is_tracker and not is_calendar:
             self.show_result("請輸入成績後計算。")
         self.page.update()
 
