@@ -364,7 +364,7 @@ class GradeCalculator(ft.Column):
         self.page.update()
 
     def show_features_dialog(self, _):
-        """彈出展示 App 特色、核心功能與使用建議的視窗（已適配手機大字體與連動縮放）。"""
+        """彈出展示 App 特色、核心功能、加入桌面教學與使用建議的視窗（已適配手機大字體與連動縮放）。"""
         is_dark = bool(self.dark_mode.value)
         card_bg = "#1E293B" if is_dark else "#F1F5F9"
         text_color = ft.Colors.WHITE if is_dark else ft.Colors.BLACK_87
@@ -418,6 +418,22 @@ class GradeCalculator(ft.Column):
                                     ft.Text("📱 最佳瀏覽建議：", weight=ft.FontWeight.BOLD, size=15 + d, color="#10B981"),
                                     ft.Text("• 安卓（Android）：建議使用 Chrome 開啟", size=14 + d, color=text_color),
                                     ft.Text("• 蘋果（iOS）：建議使用 Safari 開啟", size=14 + d, color=text_color),
+                                ],
+                            ),
+                        ),
+                        # 📲 新增：將本工具加到手機桌面教程
+                        ft.Container(
+                            padding=14,
+                            border_radius=8,
+                            bgcolor=card_bg,
+                            content=ft.Column(
+                                spacing=10,
+                                controls=[
+                                    ft.Text("📲 加到手機桌面（像 App 一樣全螢幕開啟）：", weight=ft.FontWeight.BOLD, size=15 + d, color="#8B5CF6"),
+                                    ft.Text("🤖 Android 用戶（Chrome）：", weight=ft.FontWeight.BOLD, size=14 + d, color="#60A5FA"),
+                                    ft.Text("1. 點擊畫面底部提示的「安裝」按鈕（或點右上角 ⋮ 選單）。\n2. 點選「加到主畫面」或「安裝應用程式」即可建立桌面圖示。", size=13 + d, color=text_color),
+                                    ft.Text("🍎 iPhone / iPad 用戶（Safari）：", weight=ft.FontWeight.BOLD, size=14 + d, color="#F472B6"),
+                                    ft.Text("1. 務必用 Safari 開啟，點下方工具列中間「分享」圖示（帶箭頭的方框）。\n2. 下滑選單點選「加入主畫面」➜ 右上角按「新增」即可。", size=13 + d, color=text_color),
                                 ],
                             ),
                         ),
@@ -886,12 +902,12 @@ class GradeCalculator(ft.Column):
                     export_textfield,
                 ],
             ),
-            actions=[
-                ft.Button(content="複製到剪貼簿", bgcolor="#06C755", color="#FFFFFF", on_click=copy_content),
-                ft.Button(content="關閉", on_click=close_dialog),
-            ],
-            actions_alignment=ft.MainAxisAlignment.END,
         )
+        dialog.actions = [
+            ft.Button(content="複製到剪貼簿", bgcolor="#06C755", color="#FFFFFF", on_click=copy_content),
+            ft.Button(content="關閉", on_click=close_dialog),
+        ]
+        dialog.actions_alignment = ft.MainAxisAlignment.END
 
         self.page.overlay.append(dialog)
         dialog.open = True
@@ -947,7 +963,7 @@ class GradeCalculator(ft.Column):
 
                 def escape_csv(val: str) -> str:
                     if "," in val or '"' in val:
-                        return f'"{val.replace('"', '""')}"'
+                        return f'"{val.replace("\"", "\"\"")}"'
                     return val
 
                 rows.append([
