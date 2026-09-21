@@ -40,7 +40,7 @@ jobs:
 
       - name: Build Web App
         run: |
-          flet build web --base-url /nou-study-tools/ --flutter-build-web-args="--web-renderer html" --yes
+          flet build web --base-url /nou-study-tools/ --yes
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v4
