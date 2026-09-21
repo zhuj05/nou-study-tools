@@ -2,50 +2,62 @@
 <html>
 <head>
   <base href="$FLUTTER_BASE_HREF">
+
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="NOU Study Tools">
+  <meta name="description" content="空大學業小幫手">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="空大學業小幫手">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
-  <title>NOU Study Tools</title>
+
+  <title>空大學業小幫手</title>
+  <link rel="manifest" href="manifest.json">
 
   <style>
-    /* 強制將 Loading 釘在最上層 */
-    #loading-container {
-      position: fixed !important;
+    /* 全螢幕自訂載入畫面樣式（配合你的暗黑模式主題） */
+    #custom-loading-screen {
+      position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
+      background-color: #0f172a; /* 深色背景 */
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
-      background-color: #f8fafc;
-      z-index: 2147483647 !important; /* 最高層級 */
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      transition: opacity 0.5s ease;
+      align-items: center;
+      z-index: 99999;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      transition: opacity 0.5s ease-out;
     }
 
-    .spinner {
-      width: 44px;
-      height: 44px;
-      border: 4px solid #e2e8f0;
-      border-top-color: #0d47a1;
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top: 4px solid #38bdf8; /* 水藍色旋轉條 */
       border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+      animation: spin 1s linear infinite;
+      margin-bottom: 24px;
     }
 
     .loading-title {
-      margin-top: 16px;
-      font-size: 16px;
+      color: #f8fafc;
+      font-size: 18px;
       font-weight: 600;
-      color: #1e293b;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
     }
 
     .loading-subtitle {
-      margin-top: 6px;
+      color: #94a3b8;
       font-size: 13px;
-      color: #64748b;
     }
 
     @keyframes spin {
@@ -54,33 +66,58 @@
     }
   </style>
 </head>
-<body>
-  <!-- Loading 遮罩放在 body 最上方 -->
-  <div id="loading-container">
-    <div class="spinner"></div>
-    <div class="loading-title">系統載入中</div>
-    <div class="loading-subtitle">首次開啟需下載環境，請稍候...</div>
+<body style="margin: 0; padding: 0; background-color: #0f172a;">
+
+  <!-- 自訂 Loading 遮罩層 -->
+  <div id="custom-loading-screen">
+    <div class="loading-spinner"></div>
+    <div class="loading-title">正在初始化小幫手引擎...</div>
+    <div class="loading-subtitle">初次載入約需數秒，請稍候 ☕</div>
   </div>
 
   <script>
-    function removeLoader() {
-      var loader = document.getElementById("loading-container");
+    // 定義隱藏 Loading 畫面的函式
+    function removeLoadingScreen() {
+      const loader = document.getElementById('custom-loading-screen');
       if (loader) {
-        loader.style.opacity = "0";
-        setTimeout(function () {
+        loader.style.opacity = '0';
+        setTimeout(() => {
           loader.remove();
         }, 500);
       }
     }
 
-    // 監聽 Flutter 渲染完成
-    window.addEventListener("flutter-first-frame", removeLoader);
+    // 監聽 Flutter 繪製完成事件，當主畫面出現時移除遮罩
+    window.addEventListener('flutter-first-frame', function () {
+      removeLoadingScreen();
+    });
 
-    // 防呆保護：若超過 15 秒因事件遺失未觸發，也自動移除遮罩避免畫面卡住
-    setTimeout(removeLoader, 15000);
+    // 備用機制：透過 MutationObserver 檢測 Flutter 畫布 (flt-glass-pane 或 canvas) 插入 DOM
+    const observer = new MutationObserver((mutations, obs) => {
+      if (document.querySelector('flt-glass-pane') || document.querySelector('canvas')) {
+        setTimeout(removeLoadingScreen, 600);
+        obs.disconnect();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
   </script>
 
+  <!-- Flet / Flutter 原始載入腳本 -->
   <script src="flutter.js" defer></script>
-  <script src="flet.js" defer></script>
+  <script>
+    window.addEventListener('load', function(ev) {
+      // 下載 main.dart.js 並啟動引擎
+      _flutter.loader.loadEntrypoint({
+        serviceWorker: {
+          serviceWorkerVersion: {{flutter_service_worker_version}},
+        },
+        onEntrypointLoaded: function(engineInitializer) {
+          engineInitializer.initializeEngine().then(function(appRunner) {
+            appRunner.runApp();
+          });
+        }
+      });
+    });
+  </script>
 </body>
 </html>
