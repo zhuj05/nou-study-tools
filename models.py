@@ -93,7 +93,7 @@ ACADEMIC_CALENDAR_DATA_115: dict[str, dict] = {
         ],
     },
     "115_summer": {
-        "title": "📌 115學年度 暑期",
+        "title": "📌 116學年度 暑期",
         "major_exams": [],
         "events": [
             (datetime.date(2027, 9, 15), "•🟢 116.09.15 ｜ 中秋節 休1天"),
