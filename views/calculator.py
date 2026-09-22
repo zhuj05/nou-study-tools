@@ -359,13 +359,13 @@ class GradeCalculator(ft.Column):
                     color=ft.Colors.GREY_600,
                 ),
                 ft.Text(
-                    "聯絡作者：",
-                    size=12,
+                    "聯絡作者:\n",
+                    size=17,
                     color=ft.Colors.GREY_600,
                     spans=[
                         ft.TextSpan(
                             "nou.tools.dev@gmail.com",
-                            url="mailto:nou.tools.dev@gmail.com",
+                            url="mailto:",
                             style=ft.TextStyle(
                                 color="#3B82F6",
                                 decoration=ft.TextDecoration.UNDERLINE,
@@ -1330,7 +1330,7 @@ class GradeCalculator(ft.Column):
 
                 def escape_csv(val: str) -> str:
                     if "," in val or '"' in val:
-                        return f'"{val.replace(\'"\', \'""\')}"'
+                        return f'"{val.replace('"', '""')}"'
                     return val
 
                 rows.append([
@@ -1481,7 +1481,7 @@ class GradeCalculator(ft.Column):
                 color=shadow_color,
                 blur_radius=8,
                 offset=ft.Offset(0, 2),
-            )
+            ),
 
         for item in self.tracker_cards_data:
             item["container"].border = ft.Border.all(
