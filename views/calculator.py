@@ -477,6 +477,56 @@ class GradeCalculator(ft.Column):
                                 ],
                             ),
                         ),
+                        # 📲 新增：加入手機桌面 (PWA) 與電腦書籤教學
+                        ft.Container(
+                            padding=14,
+                            border_radius=8,
+                            bgcolor=card_bg,
+                            content=ft.Column(
+                                spacing=10,
+                                controls=[
+                                    ft.Text(
+                                        "📲 建立捷徑與書籤（免下載安裝，一鍵直達）：",
+                                        weight=ft.FontWeight.BOLD,
+                                        size=15 + d,
+                                        color="#8B5CF6",
+                                    ),
+                                    ft.Text(
+                                        "🤖 Android 用戶（Chrome）：",
+                                        weight=ft.FontWeight.BOLD,
+                                        size=14 + d,
+                                        color="#60A5FA",
+                                    ),
+                                    ft.Text(
+                                        "1. 點擊畫面底部提示的「安裝」按鈕（或點右上角 ⋮ 選單）。\n2. 點選「加到主畫面」或「安裝應用程式」，桌面即會生成像 App 一樣的獨立圖示。",
+                                        size=13 + d,
+                                        color=text_color,
+                                    ),
+                                    ft.Text(
+                                        "🍎 iPhone / iPad 用戶（Safari）：",
+                                        weight=ft.FontWeight.BOLD,
+                                        size=14 + d,
+                                        color="#F472B6",
+                                    ),
+                                    ft.Text(
+                                        "1. 務必使用 Safari 開啟，點擊底部工具列中間的「分享」圖示（帶向上箭頭的方框 ⎋）。\n2. 下滑選單點選「加入主畫面」➜ 右上角按「新增」，桌面即可建立全螢幕獨立圖示。",
+                                        size=13 + d,
+                                        color=text_color,
+                                    ),
+                                    ft.Text(
+                                        "💻 電腦 PC / Mac 用戶：",
+                                        weight=ft.FontWeight.BOLD,
+                                        size=14 + d,
+                                        color="#10B981",
+                                    ),
+                                    ft.Text(
+                                        "• 鍵盤按下快捷鍵 Ctrl + D（Mac 請按 ⌘ Cmd + D），即可快速將本工具加入瀏覽器書籤列，方便平時隨時開啟！",
+                                        size=13 + d,
+                                        color=text_color,
+                                    ),
+                                ],
+                            ),
+                        ),
                         ft.Container(
                             padding=14,
                             border_radius=8,
@@ -1416,7 +1466,7 @@ class GradeCalculator(ft.Column):
                 color=shadow_color,
                 blur_radius=8,
                 offset=ft.Offset(0, 2),
-            ),
+            )
 
         for item in self.tracker_cards_data:
             item["container"].border = ft.Border.all(
