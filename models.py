@@ -96,7 +96,7 @@ ACADEMIC_CALENDAR_DATA_115: dict[str, dict] = {
             (datetime.date(2027, 6, 27), "• 116.06.26 ～ 06.27 ｜ 115下期末考補考"),
         ],
     },
-    "115_summer": {
+    "116_summer": {
         "title": "📌 116學年度 暑期",
         "major_exams": [],
         "events": [
@@ -329,7 +329,7 @@ def build_academic_calendar_view(page: ft.Page) -> ft.Container:
             controls=[
                 ft.Radio(value="115_1", label="115 上"),
                 ft.Radio(value="115_2", label="115 下"),
-                ft.Radio(value="115_summer", label="115 暑"),
+                ft.Radio(value="116_summer", label="116 暑"),
             ],
             alignment=ft.MainAxisAlignment.CENTER,
             spacing=15,
