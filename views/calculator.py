@@ -1,10 +1,11 @@
 import datetime
-import sys
+import math
 from pathlib import Path
+import sys
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
-    sys.path.insert(0, str(ROOT_DIR))
+    sys.path.insert(0, str(ROOT_DIR))無法達到 60 分及格門檻
 
 import flet as ft
 
@@ -37,10 +38,15 @@ async def set_clipboard_universal(page: ft.Page, text: str) -> bool:
 
     try:
         import js
+
         if hasattr(js, "navigator") and hasattr(js.navigator, "clipboard"):
             js.navigator.clipboard.writeText(text)
             return True
-        elif hasattr(js, "window") and hasattr(js.window, "navigator") and hasattr(js.window.navigator, "clipboard"):
+        elif (
+            hasattr(js, "window")
+            and hasattr(js.window, "navigator")
+            and hasattr(js.window.navigator, "clipboard")
+        ):
             js.window.navigator.clipboard.writeText(text)
             return True
     except Exception:
@@ -60,6 +66,7 @@ from models import (
 
 
 class GradeCalculator(ft.Column):
+
     def __init__(self):
         self.input_fields = []
         self.credit_selectors = []
@@ -81,15 +88,23 @@ class GradeCalculator(ft.Column):
             options=[
                 ft.DropdownOption(key="summer", text="暑修"),
                 ft.DropdownOption(key="non_summer", text="非暑修"),
-                ft.DropdownOption(key="semester_average", text="計算學期總成績平均"),
-                ft.DropdownOption(key="exam_hw_tracker", text="考試與作業日期紀錄"),
-                ft.DropdownOption(key="academic_calendar", text="重要行事曆日程"),
+                ft.DropdownOption(
+                    key="semester_average", text="計算學期總成績平均"
+                ),
+                ft.DropdownOption(
+                    key="exam_hw_tracker", text="考試與作業日期紀錄"
+                ),
+                ft.DropdownOption(
+                    key="academic_calendar", text="重要行事曆日程"
+                ),
             ],
             on_select=self.change_semester,
         )
         self.regular = self.create_input("平時成績（30%）")
         self.midterm = self.create_input("期中考成績（30%）")
-        self.final = self.create_input("期末考成績（40%）")
+        self.final = self.create_input(
+            "期末考成績（40%）（留空可試算及格目標）"
+        )
 
         # 學期總平均模式欄位 (7 科)
         self.average_scores = []
@@ -160,7 +175,12 @@ class GradeCalculator(ft.Column):
         )
 
         # 頂部使用說明提示區塊
-        self.instruction_title = ft.Text("【操作與存檔使用說明】", weight=ft.FontWeight.BOLD, color="#60A5FA", size=15)
+        self.instruction_title = ft.Text(
+            "【操作與存檔使用說明】",
+            weight=ft.FontWeight.BOLD,
+            color="#60A5FA",
+            size=15,
+        )
         self.instruction_content = ft.Text(
             "• 預設顯示前 3 門常用科目，若修習更多課可點選下方【展開更多科目】。\n"
             "• 每個科目底部皆有【清空此科目】按鈕，可單獨重置不影響其他科目。\n"
@@ -181,7 +201,11 @@ class GradeCalculator(ft.Column):
                 controls=[
                     ft.Row(
                         controls=[
-                            ft.Icon(ft.Icons.INFO_OUTLINE, color="#60A5FA", size=20),
+                            ft.Icon(
+                                ft.Icons.INFO_OUTLINE,
+                                color="#60A5FA",
+                                size=20,
+                            ),
                             self.instruction_title,
                         ]
                     ),
@@ -260,7 +284,7 @@ class GradeCalculator(ft.Column):
         self.action_buttons = ft.Row(
             controls=[
                 ft.Button(
-                    content="計算學期成績",
+                    content="計算學期成績 / 試算及格門檻",
                     bgcolor="#0066CC",
                     color="#FFFFFF",
                     on_click=self.calculate,
@@ -301,7 +325,11 @@ class GradeCalculator(ft.Column):
             controls=[
                 ft.Row(
                     controls=[
-                        ft.Text("空大學期成績與課業進度小幫手", size=18, weight=ft.FontWeight.BOLD),
+                        ft.Text(
+                            "空大學期成績與課業進度小幫手",
+                            size=18,
+                            weight=ft.FontWeight.BOLD,
+                        ),
                         self.features_btn,
                     ],
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -325,8 +353,16 @@ class GradeCalculator(ft.Column):
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 ),
                 self.shortcuts_panel,
-                ft.Text("© 2026 朱家儀. All rights reserved.", size=12, color=ft.Colors.GREY_600),
-                ft.Text("本工具為學生自行開發之非官方輔助工具", size=12, color=ft.Colors.GREY_600),
+                ft.Text(
+                    "© 2026 朱家儀. All rights reserved.",
+                    size=12,
+                    color=ft.Colors.GREY_600,
+                ),
+                ft.Text(
+                    "本工具為學生自行開發之非官方輔助工具",
+                    size=12,
+                    color=ft.Colors.GREY_600,
+                ),
             ],
         )
         self.apply_input_theme(False)
@@ -341,7 +377,11 @@ class GradeCalculator(ft.Column):
         if self.font_scale_delta > -2:
             self.font_scale_delta -= 2
             self.apply_font_scaling()
-            delta_str = f"+{self.font_scale_delta}" if self.font_scale_delta > 0 else str(self.font_scale_delta)
+            delta_str = (
+                f"+{self.font_scale_delta}"
+                if self.font_scale_delta > 0
+                else str(self.font_scale_delta)
+            )
             self.show_toast(f"字體已縮小 ({delta_str})", "#2563EB")
 
     def apply_font_scaling(self):
@@ -378,7 +418,11 @@ class GradeCalculator(ft.Column):
             title=ft.Row(
                 controls=[
                     ft.Icon(ft.Icons.SCHOOL, color="#3B82F6", size=22 + d),
-                    ft.Text("【空大學生自製】功能特色與說明", weight=ft.FontWeight.BOLD, size=16 + d),
+                    ft.Text(
+                        "【空大學生自製】功能特色與說明",
+                        weight=ft.FontWeight.BOLD,
+                        size=16 + d,
+                    ),
                 ]
             ),
             content=ft.Container(
@@ -399,12 +443,37 @@ class GradeCalculator(ft.Column):
                             content=ft.Column(
                                 spacing=10,
                                 controls=[
-                                    ft.Text("⭐ 5 大核心功能（點上方功能下拉選單切換）：", weight=ft.FontWeight.BOLD, size=15 + d, color="#3B82F6"),
-                                    ft.Text("• 學期平均計算：最多可算 7 科，右側填入學分數即可加權計算（沒修滿 7 科直接留空）。", size=14 + d, color=text_color),
-                                    ft.Text("• 單科分數計算：支援一般學期（非暑修）與暑修配分計算。", size=14 + d, color=text_color),
-                                    ft.Text("• 考試／作業日程記錄：支援考試第 1~6 節與線上測驗／報告截止時間快速套用、單科獨立清空，可一鍵匯出至 LINE 筆記本或 Excel 檔！", size=14 + d, color=text_color),
-                                    ft.Text("• 重要行事曆日程：支援 115 上、115 下、115 暑期關鍵時程一鍵切換查詢，重要日子不再漏掉。", size=14 + d, color=text_color),
-                                    ft.Text("• 常用校園連結：整合至畫面下方（可展開），一鍵直達空大首頁、數位學習平台、教務系統、視訊面授教室、出版中心、教務處、學習指導中心及行事曆。", size=14 + d, color=text_color),
+                                    ft.Text(
+                                        "⭐ 5 大核心功能（點上方功能下拉選單切換）：",
+                                        weight=ft.FontWeight.BOLD,
+                                        size=15 + d,
+                                        color="#3B82F6",
+                                    ),
+                                    ft.Text(
+                                        "• 學期平均計算：最多可算 7 科，右側填入學分數即可加權計算（沒修滿 7 科直接留空）。",
+                                        size=14 + d,
+                                        color=text_color,
+                                    ),
+                                    ft.Text(
+                                        "• 單科分數計算／門檻試算：支援非暑修與暑修計算；若期末考尚未考（留空），自動計算期末至少需要幾分才能及格！",
+                                        size=14 + d,
+                                        color=text_color,
+                                    ),
+                                    ft.Text(
+                                        "• 考試／作業日程記錄：支援考試第 1~6 節與線上測驗／報告截止時間快速套用、單科獨立清空，可一鍵匯出至 LINE 筆記本或 Excel 檔！",
+                                        size=14 + d,
+                                        color=text_color,
+                                    ),
+                                    ft.Text(
+                                        "• 重要行事曆日程：支援 115 上、115 下、115 暑期關鍵時程一鍵切換查詢，重要日子不再漏掉。",
+                                        size=14 + d,
+                                        color=text_color,
+                                    ),
+                                    ft.Text(
+                                        "• 常用校園連結：整合至畫面下方（可展開），一鍵直達空大首頁、數位學習平台、教務系統、視訊面授教室、出版中心、教務處、學習指導中心及行事曆。",
+                                        size=14 + d,
+                                        color=text_color,
+                                    ),
                                 ],
                             ),
                         ),
@@ -415,9 +484,22 @@ class GradeCalculator(ft.Column):
                             content=ft.Column(
                                 spacing=8,
                                 controls=[
-                                    ft.Text("📱 最佳瀏覽建議：", weight=ft.FontWeight.BOLD, size=15 + d, color="#10B981"),
-                                    ft.Text("• 安卓（Android）：建議使用 Chrome 開啟", size=14 + d, color=text_color),
-                                    ft.Text("• 蘋果（iOS）：建議使用 Safari 開啟", size=14 + d, color=text_color),
+                                    ft.Text(
+                                        "📱 最佳瀏覽建議：",
+                                        weight=ft.FontWeight.BOLD,
+                                        size=15 + d,
+                                        color="#10B981",
+                                    ),
+                                    ft.Text(
+                                        "• 安卓（Android）：建議使用 Chrome 開啟",
+                                        size=14 + d,
+                                        color=text_color,
+                                    ),
+                                    ft.Text(
+                                        "• 蘋果（iOS）：建議使用 Safari 開啟",
+                                        size=14 + d,
+                                        color=text_color,
+                                    ),
                                 ],
                             ),
                         ),
@@ -428,17 +510,55 @@ class GradeCalculator(ft.Column):
                             content=ft.Column(
                                 spacing=8,
                                 controls=[
-                                    ft.Text("✨ 近期更新亮點：", weight=ft.FontWeight.BOLD, size=15 + d, color="#F59E0B"),
-                                    ft.Text("• 新增 115 學年度重要行事曆日程查詢（水平按鈕快速切換學期）", size=14 + d, color=text_color),
-                                    ft.Text("• 新增單科獨立清空功能（重填更自由不誤觸）", size=14 + d, color=text_color),
-                                    ft.Text("• 支援字體放大縮小功能（長輩閱讀更輕鬆）", size=14 + d, color=text_color),
-                                    ft.Text("• 畫面瘦身：預設顯示 3 科，手機閱讀不再冗長", size=14 + d, color=text_color),
-                                    ft.Text("• 考試節次智慧切換（第 1~6 節一鍵套用，介面簡潔不雜亂）", size=14 + d, color=text_color),
-                                    ft.Text("• 新增🌙模式（夜間讀書不刺眼）", size=14 + d, color=text_color),
+                                    ft.Text(
+                                        "✨ 近期更新亮點：",
+                                        weight=ft.FontWeight.BOLD,
+                                        size=15 + d,
+                                        color="#F59E0B",
+                                    ),
+                                    ft.Text(
+                                        "• 新增期末考及格目標試算（期末考留空即可推算需要考幾分）",
+                                        size=14 + d,
+                                        color=text_color,
+                                    ),
+                                    ft.Text(
+                                        "• 新增 115 學年度重要行事曆日程查詢（水平按鈕快速切換學期）",
+                                        size=14 + d,
+                                        color=text_color,
+                                    ),
+                                    ft.Text(
+                                        "• 新增單科獨立清空功能（重填更自由不誤觸）",
+                                        size=14 + d,
+                                        color=text_color,
+                                    ),
+                                    ft.Text(
+                                        "• 支援字體放大縮小功能（長輩閱讀更輕鬆）",
+                                        size=14 + d,
+                                        color=text_color,
+                                    ),
+                                    ft.Text(
+                                        "• 畫面瘦身：預設顯示 3 科，手機閱讀不再冗長",
+                                        size=14 + d,
+                                        color=text_color,
+                                    ),
+                                    ft.Text(
+                                        "• 考試節次智慧切換（第 1~6 節一鍵套用，介面簡潔不雜亂）",
+                                        size=14 + d,
+                                        color=text_color,
+                                    ),
+                                    ft.Text(
+                                        "• 新增🌙模式（夜間讀書不刺眼）",
+                                        size=14 + d,
+                                        color=text_color,
+                                    ),
                                 ],
                             ),
                         ),
-                        ft.Text("—\n（非學校官方系統，純同學交流分享，有需要歡迎自行使用！）", size=12 + d, color=ft.Colors.GREY_500),
+                        ft.Text(
+                            "—\n（非學校官方系統，純同學交流分享，有需要歡迎自行使用！）",
+                            size=12 + d,
+                            color=ft.Colors.GREY_500,
+                        ),
                     ],
                 ),
             ),
@@ -462,7 +582,9 @@ class GradeCalculator(ft.Column):
         self.input_fields.append(field)
         return field
 
-    def input_card(self, field: ft.TextField, expand: int | None = None) -> ft.Container:
+    def input_card(
+        self, field: ft.TextField, expand: int | None = None
+    ) -> ft.Container:
         card = ft.Container(
             content=field,
             expand=expand,
@@ -475,7 +597,9 @@ class GradeCalculator(ft.Column):
         self.input_containers.append(card)
         return card
 
-    def _create_time_dropdowns(self, default_h: str = "08", default_m: str = "30"):
+    def _create_time_dropdowns(
+        self, default_h: str = "08", default_m: str = "30"
+    ):
         hours = [f"{i:02d}" for i in range(0, 24)]
         minutes = [f"{i:02d}" for i in range(0, 60, 5)]
 
@@ -504,6 +628,7 @@ class GradeCalculator(ft.Column):
         )
 
         def pick_date(target_field: ft.TextField):
+
             def on_date_picked(e):
                 val = e.control.value
                 if val:
@@ -511,7 +636,9 @@ class GradeCalculator(ft.Column):
                         target_field.value = val.split("T")[0]
                     elif isinstance(val, (datetime.date, datetime.datetime)):
                         adjusted = val + datetime.timedelta(hours=12)
-                        target_field.value = f"{adjusted.year:04d}-{adjusted.month:02d}-{adjusted.day:02d}"
+                        target_field.value = (
+                            f"{adjusted.year:04d}-{adjusted.month:02d}-{adjusted.day:02d}"
+                        )
                     else:
                         target_field.value = str(val)[:10]
                     self.page.update()
@@ -523,13 +650,62 @@ class GradeCalculator(ft.Column):
             self.page.update()
 
         time_presets = {
-            "period_1": ("第 1 節", "08:30 ~ 09:40", "08", "30", "09", "40"),
-            "period_2": ("第 2 節", "10:00 ~ 11:10", "10", "00", "11", "10"),
-            "period_3": ("第 3 節", "11:30 ~ 12:40", "11", "30", "12", "40"),
-            "period_4": ("第 4 節", "13:30 ~ 14:40", "13", "30", "14", "40"),
-            "period_5": ("第 5 節", "15:00 ~ 16:10", "15", "00", "16", "10"),
-            "period_6": ("第 6 節", "16:30 ~ 17:40", "16", "30", "17", "40"),
-            "online_deadline": ("線上測驗/報告截止", "23:59 截止", "00", "00", "23", "59"),
+            "period_1": (
+                "第 1 節",
+                "08:30 ~ 09:40",
+                "08",
+                "30",
+                "09",
+                "40",
+            ),
+            "period_2": (
+                "第 2 節",
+                "10:00 ~ 11:10",
+                "10",
+                "00",
+                "11",
+                "10",
+            ),
+            "period_3": (
+                "第 3 節",
+                "11:30 ~ 12:40",
+                "11",
+                "30",
+                "12",
+                "40",
+            ),
+            "period_4": (
+                "第 4 節",
+                "13:30 ~ 14:40",
+                "13",
+                "30",
+                "14",
+                "40",
+            ),
+            "period_5": (
+                "第 5 節",
+                "15:00 ~ 16:10",
+                "15",
+                "00",
+                "16",
+                "10",
+            ),
+            "period_6": (
+                "第 6 節",
+                "16:30 ~ 17:40",
+                "16",
+                "30",
+                "17",
+                "40",
+            ),
+            "online_deadline": (
+                "線上測驗/報告截止",
+                "23:59 截止",
+                "00",
+                "00",
+                "23",
+                "59",
+            ),
         }
 
         preset_options = [
@@ -539,21 +715,50 @@ class GradeCalculator(ft.Column):
             ft.DropdownOption(key="period_4", text="第 4 節 (13:30 ~ 14:40)"),
             ft.DropdownOption(key="period_5", text="第 5 節 (15:00 ~ 16:10)"),
             ft.DropdownOption(key="period_6", text="第 6 節 (16:30 ~ 17:40)"),
-            ft.DropdownOption(key="online_deadline", text="線上測驗 / 報告截止 (23:59)"),
-            ft.DropdownOption(key="custom", text="自訂時段 (下方自由微調)"),
+            ft.DropdownOption(
+                key="online_deadline", text="線上測驗 / 報告截止 (23:59)"
+            ),
+            ft.DropdownOption(
+                key="custom", text="自訂時段 (下方自由微調)"
+            ),
         ]
 
         # 期中考欄位
-        midterm_start_date = ft.TextField(label="期中考-開始日期", dense=True, read_only=True, expand=True, text_size=13)
-        midterm_start_btn = ft.IconButton(icon=ft.Icons.CALENDAR_MONTH, on_click=lambda _: pick_date(midterm_start_date))
-        midterm_start_h, midterm_start_m = self._create_time_dropdowns("08", "30")
+        midterm_start_date = ft.TextField(
+            label="期中考-開始日期",
+            dense=True,
+            read_only=True,
+            expand=True,
+            text_size=13,
+        )
+        midterm_start_btn = ft.IconButton(
+            icon=ft.Icons.CALENDAR_MONTH,
+            on_click=lambda _: pick_date(midterm_start_date),
+        )
+        midterm_start_h, midterm_start_m = self._create_time_dropdowns(
+            "08", "30"
+        )
 
-        midterm_end_date = ft.TextField(label="期中考-結束日期", dense=True, read_only=True, expand=True, text_size=13)
-        midterm_end_btn = ft.IconButton(icon=ft.Icons.CALENDAR_MONTH, on_click=lambda _: pick_date(midterm_end_date))
+        midterm_end_date = ft.TextField(
+            label="期中考-結束日期",
+            dense=True,
+            read_only=True,
+            expand=True,
+            text_size=13,
+        )
+        midterm_end_btn = ft.IconButton(
+            icon=ft.Icons.CALENDAR_MONTH,
+            on_click=lambda _: pick_date(midterm_end_date),
+        )
         midterm_end_h, midterm_end_m = self._create_time_dropdowns("09", "40")
 
-        midterm_time_row1 = ft.Row(visible=False, controls=[midterm_start_h, ft.Text(":"), midterm_start_m])
-        midterm_time_row2 = ft.Row(visible=False, controls=[midterm_end_h, ft.Text(":"), midterm_end_m])
+        midterm_time_row1 = ft.Row(
+            visible=False,
+            controls=[midterm_start_h, ft.Text(":"), midterm_start_m],
+        )
+        midterm_time_row2 = ft.Row(
+            visible=False, controls=[midterm_end_h, ft.Text(":"), midterm_end_m]
+        )
 
         def on_midterm_preset_change(e):
             val = e.control.value
@@ -579,16 +784,39 @@ class GradeCalculator(ft.Column):
         )
 
         # 期末考欄位
-        final_start_date = ft.TextField(label="期末考-開始日期", dense=True, read_only=True, expand=True, text_size=13)
-        final_start_btn = ft.IconButton(icon=ft.Icons.CALENDAR_MONTH, on_click=lambda _: pick_date(final_start_date))
+        final_start_date = ft.TextField(
+            label="期末考-開始日期",
+            dense=True,
+            read_only=True,
+            expand=True,
+            text_size=13,
+        )
+        final_start_btn = ft.IconButton(
+            icon=ft.Icons.CALENDAR_MONTH,
+            on_click=lambda _: pick_date(final_start_date),
+        )
         final_start_h, final_start_m = self._create_time_dropdowns("08", "30")
 
-        final_end_date = ft.TextField(label="期末考-結束日期", dense=True, read_only=True, expand=True, text_size=13)
-        final_end_btn = ft.IconButton(icon=ft.Icons.CALENDAR_MONTH, on_click=lambda _: pick_date(final_end_date))
+        final_end_date = ft.TextField(
+            label="期末考-結束日期",
+            dense=True,
+            read_only=True,
+            expand=True,
+            text_size=13,
+        )
+        final_end_btn = ft.IconButton(
+            icon=ft.Icons.CALENDAR_MONTH,
+            on_click=lambda _: pick_date(final_end_date),
+        )
         final_end_h, final_end_m = self._create_time_dropdowns("09", "40")
 
-        final_time_row1 = ft.Row(visible=False, controls=[final_start_h, ft.Text(":"), final_start_m])
-        final_time_row2 = ft.Row(visible=False, controls=[final_end_h, ft.Text(":"), final_end_m])
+        final_time_row1 = ft.Row(
+            visible=False,
+            controls=[final_start_h, ft.Text(":"), final_start_m],
+        )
+        final_time_row2 = ft.Row(
+            visible=False, controls=[final_end_h, ft.Text(":"), final_end_m]
+        )
 
         def on_final_preset_change(e):
             val = e.control.value
@@ -614,8 +842,17 @@ class GradeCalculator(ft.Column):
         )
 
         # 作業欄位
-        hw1_date = ft.TextField(label="作業 1 截止日", dense=True, read_only=True, expand=True, text_size=13)
-        hw1_btn = ft.IconButton(icon=ft.Icons.CALENDAR_MONTH, on_click=lambda _: pick_date(hw1_date))
+        hw1_date = ft.TextField(
+            label="作業 1 截止日",
+            dense=True,
+            read_only=True,
+            expand=True,
+            text_size=13,
+        )
+        hw1_btn = ft.IconButton(
+            icon=ft.Icons.CALENDAR_MONTH,
+            on_click=lambda _: pick_date(hw1_date),
+        )
         hw1_status = ft.Dropdown(
             label="作業 1 狀態",
             value="未完成",
@@ -628,8 +865,17 @@ class GradeCalculator(ft.Column):
             expand=True,
         )
 
-        hw2_date = ft.TextField(label="作業 2 截止日", dense=True, read_only=True, expand=True, text_size=13)
-        hw2_btn = ft.IconButton(icon=ft.Icons.CALENDAR_MONTH, on_click=lambda _: pick_date(hw2_date))
+        hw2_date = ft.TextField(
+            label="作業 2 截止日",
+            dense=True,
+            read_only=True,
+            expand=True,
+            text_size=13,
+        )
+        hw2_btn = ft.IconButton(
+            icon=ft.Icons.CALENDAR_MONTH,
+            on_click=lambda _: pick_date(hw2_date),
+        )
         hw2_status = ft.Dropdown(
             label="作業 2 狀態",
             value="未完成",
@@ -679,7 +925,10 @@ class GradeCalculator(ft.Column):
             hw2_date.value = ""
             hw2_status.value = "未完成"
             memo_field.value = ""
-            self.show_toast(f"已清空【{placeholder_title}】的所有資料！", ft.Colors.ORANGE_700)
+            self.show_toast(
+                f"已清空【{placeholder_title}】的所有資料！",
+                ft.Colors.ORANGE_700,
+            )
             self.page.update()
 
         clear_single_btn = ft.TextButton(
@@ -692,9 +941,13 @@ class GradeCalculator(ft.Column):
 
         self.tracker_input_fields.extend([
             subject_name,
-            midterm_start_date, midterm_end_date,
-            final_start_date, final_end_date,
-            hw1_date, hw2_date, memo_field
+            midterm_start_date,
+            midterm_end_date,
+            final_start_date,
+            final_end_date,
+            hw1_date,
+            hw2_date,
+            memo_field,
         ])
 
         card_container = ft.Container(
@@ -706,15 +959,49 @@ class GradeCalculator(ft.Column):
                 controls=[
                     subject_name,
                     # 期中考起訖排版
-                    ft.Text("【期中考起訖】", size=12, weight=ft.FontWeight.BOLD, color="#60A5FA"),
+                    ft.Text(
+                        "【期中考起訖】",
+                        size=12,
+                        weight=ft.FontWeight.BOLD,
+                        color="#60A5FA",
+                    ),
                     midterm_preset,
-                    ft.Row(controls=[midterm_start_date, midterm_start_btn, midterm_time_row1]),
-                    ft.Row(controls=[midterm_end_date, midterm_end_btn, midterm_time_row2]),
+                    ft.Row(
+                        controls=[
+                            midterm_start_date,
+                            midterm_start_btn,
+                            midterm_time_row1,
+                        ]
+                    ),
+                    ft.Row(
+                        controls=[
+                            midterm_end_date,
+                            midterm_end_btn,
+                            midterm_time_row2,
+                        ]
+                    ),
                     # 期末考起訖排版
-                    ft.Text("【期末考起訖】", size=12, weight=ft.FontWeight.BOLD, color="#60A5FA"),
+                    ft.Text(
+                        "【期末考起訖】",
+                        size=12,
+                        weight=ft.FontWeight.BOLD,
+                        color="#60A5FA",
+                    ),
                     final_preset,
-                    ft.Row(controls=[final_start_date, final_start_btn, final_time_row1]),
-                    ft.Row(controls=[final_end_date, final_end_btn, final_time_row2]),
+                    ft.Row(
+                        controls=[
+                            final_start_date,
+                            final_start_btn,
+                            final_time_row1,
+                        ]
+                    ),
+                    ft.Row(
+                        controls=[
+                            final_end_date,
+                            final_end_btn,
+                            final_time_row2,
+                        ]
+                    ),
                     # 作業與備註
                     ft.Row(controls=[hw1_date, hw1_btn]),
                     hw1_status,
@@ -755,7 +1042,17 @@ class GradeCalculator(ft.Column):
             "time_presets": time_presets,
         }
 
-    def _format_exam_line(self, preset_key: str, start_d: str, end_d: str, sh: str, sm: str, eh: str, em: str, presets_dict: dict) -> str:
+    def _format_exam_line(
+        self,
+        preset_key: str,
+        start_d: str,
+        end_d: str,
+        sh: str,
+        sm: str,
+        eh: str,
+        em: str,
+        presets_dict: dict,
+    ) -> str:
         if not start_d and not end_d:
             return ""
 
@@ -820,7 +1117,14 @@ class GradeCalculator(ft.Column):
             hw2_status = item["hw2"].value or "未完成"
             memo = (item["memo"].value or "").strip()
 
-            if subject or midterm_str or final_str or hw1_date or hw2_date or memo:
+            if (
+                subject
+                or midterm_str
+                or final_str
+                or hw1_date
+                or hw2_date
+                or memo
+            ):
                 has_data = True
                 display_title = subject if subject else f"科目 {idx}"
                 lines.append(f"【{display_title}】")
@@ -839,7 +1143,10 @@ class GradeCalculator(ft.Column):
                 lines.append("------------------------")
 
         if not has_data:
-            self.show_toast("請至少填寫一門科目的資料再進行複製！", ft.Colors.ORANGE_700)
+            self.show_toast(
+                "請至少填寫一門科目的資料再進行複製！",
+                ft.Colors.ORANGE_700,
+            )
             return
 
         line_text = "\n".join(lines)
@@ -857,9 +1164,15 @@ class GradeCalculator(ft.Column):
         async def copy_content(_):
             success = await set_clipboard_universal(self.page, line_text)
             if success:
-                self.show_toast("✅ 已成功複製到剪貼簿！可直接至 LINE 按貼上。", ft.Colors.GREEN_700)
+                self.show_toast(
+                    "✅ 已成功複製到剪貼簿！可直接至 LINE 按貼上。",
+                    ft.Colors.GREEN_700,
+                )
             else:
-                self.show_toast("瀏覽器安全性限制，請點擊上方框內全選複製。", ft.Colors.ORANGE_700)
+                self.show_toast(
+                    "瀏覽器安全性限制，請點擊上方框內全選複製。",
+                    ft.Colors.ORANGE_700,
+                )
 
             dialog.open = False
             self.page.update()
@@ -887,7 +1200,12 @@ class GradeCalculator(ft.Column):
                 ],
             ),
             actions=[
-                ft.Button(content="複製到剪貼簿", bgcolor="#06C755", color="#FFFFFF", on_click=copy_content),
+                ft.Button(
+                    content="複製到剪貼簿",
+                    bgcolor="#06C755",
+                    color="#FFFFFF",
+                    on_click=copy_content,
+                ),
                 ft.Button(content="關閉", on_click=close_dialog),
             ],
             actions_alignment=ft.MainAxisAlignment.END,
@@ -962,7 +1280,10 @@ class GradeCalculator(ft.Column):
                 ])
 
         if not has_data:
-            self.show_toast("請至少填寫一門科目的資料再進行匯出！", ft.Colors.ORANGE_700)
+            self.show_toast(
+                "請至少填寫一門科目的資料再進行匯出！",
+                ft.Colors.ORANGE_700,
+            )
             return
 
         csv_text = "\n".join([",".join(row) for row in rows])
@@ -980,9 +1301,15 @@ class GradeCalculator(ft.Column):
         async def copy_content(_):
             success = await set_clipboard_universal(self.page, csv_text)
             if success:
-                self.show_toast("✅ 已成功複製！請貼到記事本，並依說明存為含 BOM 的 UTF-8 CSV。", ft.Colors.GREEN_700)
+                self.show_toast(
+                    "✅ 已成功複製！請貼到記事本，並依說明存為含 BOM 的 UTF-8 CSV。",
+                    ft.Colors.GREEN_700,
+                )
             else:
-                self.show_toast("瀏覽器安全性限制，請點擊上方框內全選複製。", ft.Colors.ORANGE_700)
+                self.show_toast(
+                    "瀏覽器安全性限制，請點擊上方框內全選複製。",
+                    ft.Colors.ORANGE_700,
+                )
 
             dialog.open = False
             self.page.update()
@@ -1010,7 +1337,12 @@ class GradeCalculator(ft.Column):
                 ],
             ),
             actions=[
-                ft.Button(content="複製全部內容", bgcolor="#2563EB", color="#FFFFFF", on_click=copy_content),
+                ft.Button(
+                    content="複製全部內容",
+                    bgcolor="#2563EB",
+                    color="#FFFFFF",
+                    on_click=copy_content,
+                ),
                 ft.Button(content="關閉", on_click=close_dialog),
             ],
             actions_alignment=ft.MainAxisAlignment.END,
@@ -1084,16 +1416,22 @@ class GradeCalculator(ft.Column):
                 color=shadow_color,
                 blur_radius=8,
                 offset=ft.Offset(0, 2),
-            )
+            ),
 
         for item in self.tracker_cards_data:
-            item["container"].border = ft.Border.all(1, "#334155" if is_dark else "#E2E8F0")
+            item["container"].border = ft.Border.all(
+                1, "#334155" if is_dark else "#E2E8F0"
+            )
             item["container"].bgcolor = "#1E293B" if is_dark else "#FFFFFF"
 
         if hasattr(self, "instruction_box"):
             self.instruction_box.bgcolor = "#1E293B" if is_dark else "#EFF6FF"
-            self.instruction_box.border = ft.Border.all(1, "#3B82F6" if is_dark else "#93C5FD")
-            self.instruction_content.color = ft.Colors.WHITE if is_dark else ft.Colors.BLACK_87
+            self.instruction_box.border = ft.Border.all(
+                1, "#3B82F6" if is_dark else "#93C5FD"
+            )
+            self.instruction_content.color = (
+                ft.Colors.WHITE if is_dark else ft.Colors.BLACK_87
+            )
 
     def change_semester(self, _):
         mode = self.semester.value
@@ -1106,7 +1444,11 @@ class GradeCalculator(ft.Column):
         self.regular.visible = is_grade_calc
         self.midterm.visible = is_grade_calc and not is_summer
         self.final.visible = is_grade_calc
-        self.final.label = "期末考成績（70%）" if is_summer else "期末考成績（40%）"
+        self.final.label = (
+            "期末考成績（70%）（留空可試算及格目標）"
+            if is_summer
+            else "期末考成績（40%）（留空可試算及格目標）"
+        )
 
         for row in self.average_rows:
             row.visible = is_average
@@ -1115,7 +1457,9 @@ class GradeCalculator(ft.Column):
 
         # 當切換到行事曆時動態載入元件
         if is_calendar:
-            self.calendar_panel.content = build_academic_calendar_view(self.page)
+            self.calendar_panel.content = build_academic_calendar_view(
+                self.page
+            )
             self.calendar_panel.visible = True
         else:
             self.calendar_panel.visible = False
@@ -1131,12 +1475,16 @@ class GradeCalculator(ft.Column):
 
     def toggle_dark_mode(self, _):
         is_dark = self.dark_mode.value
-        self.page.theme_mode = ft.ThemeMode.DARK if is_dark else ft.ThemeMode.LIGHT
+        self.page.theme_mode = (
+            ft.ThemeMode.DARK if is_dark else ft.ThemeMode.LIGHT
+        )
         self.page.bgcolor = "#0F172A" if is_dark else "#F8F9FA"
         self.apply_input_theme(is_dark)
 
         if self.result_box.border is not None:
-            self.result.color = ft.Colors.WHITE if is_dark else ft.Colors.BLACK_87
+            self.result.color = (
+                ft.Colors.WHITE if is_dark else ft.Colors.BLACK_87
+            )
         self.page.update()
 
     def show_result(self, message: str, passed: bool | None = None):
@@ -1145,8 +1493,12 @@ class GradeCalculator(ft.Column):
 
         if passed is None:
             self.result_box.bgcolor = "#1E293B" if is_dark else "#F1F5F9"
-            self.result_box.border = ft.Border.all(1, "#334155" if is_dark else "#CBD5E1")
-            self.result.color = ft.Colors.WHITE if is_dark else ft.Colors.BLACK_87
+            self.result_box.border = ft.Border.all(
+                1, "#334155" if is_dark else "#CBD5E1"
+            )
+            self.result.color = (
+                ft.Colors.WHITE if is_dark else ft.Colors.BLACK_87
+            )
         else:
             self.result_box.border = None
             if passed:
@@ -1160,9 +1512,13 @@ class GradeCalculator(ft.Column):
         is_visible = not self.shortcuts_panel.visible
         self.shortcuts_panel.visible = is_visible
         self.shortcuts_toggle_btn.icon = (
-            ft.Icons.KEYBOARD_ARROW_UP if is_visible else ft.Icons.KEYBOARD_ARROW_DOWN
+            ft.Icons.KEYBOARD_ARROW_UP
+            if is_visible
+            else ft.Icons.KEYBOARD_ARROW_DOWN
         )
-        self.shortcuts_toggle_btn.tooltip = "收合常用網頁" if is_visible else "展開常用網頁"
+        self.shortcuts_toggle_btn.tooltip = (
+            "收合常用網頁" if is_visible else "展開常用網頁"
+        )
         self.page.update()
 
     def clear_all_errors(self):
@@ -1192,28 +1548,140 @@ class GradeCalculator(ft.Column):
         self.page.update()
 
     def calculate_course_grade(self):
-        if not (self.regular.value or "").strip():
+        regular_val = (self.regular.value or "").strip()
+        final_val = (self.final.value or "").strip()
+        midterm_val = (self.midterm.value or "").strip()
+
+        if not regular_val:
             self.regular.error_text = "請輸入平時成績"
             raise ValueError("請輸入平時成績。")
-        if not (self.final.value or "").strip():
-            self.final.error_text = "請輸入期末考成績"
-            raise ValueError("請輸入期末考成績。")
 
+        try:
+            reg_score = float(regular_val)
+        except ValueError:
+            self.regular.error_text = "請輸入有效數字"
+            raise ValueError("平時成績請輸入有效數字。")
+
+        if not (0.0 <= reg_score <= 100.0):
+            self.regular.error_text = "需介於 0 到 100 分"
+            raise ValueError("平時成績須介於 0 到 100 分之間。")
+
+        # -------------------------------------------------------------
+        # 情境 A：暑修模式 (平時 30% + 期末 70%)
+        # -------------------------------------------------------------
         if self.semester.value == "summer":
-            total, letter, gpa, passed = calculate_grade(
-                float(self.regular.value),
-                float(self.final.value),
-            )
-        else:
-            if not (self.midterm.value or "").strip():
-                self.midterm.error_text = "請輸入期中考成績"
-                raise ValueError("請輸入期中考成績。")
-            total, letter, gpa, passed = calculate_grade(
-                float(self.regular.value),
-                float(self.final.value),
-                float(self.midterm.value),
-            )
+            # 使用者未輸入期末考成績 -> 試算及格門檻
+            if not final_val:
+                needed = (60.0 - reg_score * 0.3) / 0.7
+                if needed <= 0:
+                    msg = (
+                        f"📊【期末考及格目標試算】\n"
+                        f"• 目前平時成績（30%）：{reg_score:.1f} 分\n"
+                        f"• 目前累積得分：{reg_score * 0.3:.2f} 分\n"
+                        f"🎉 目前成績已非常穩健，期末考即使考 0 分也能順利及格！"
+                    )
+                    self.show_result(msg, True)
+                elif needed > 100.0:
+                    needed_rounded = round(needed, 1)
+                    msg = (
+                        f"📊【期末考及格目標試算】\n"
+                        f"• 目前平時成績（30%）：{reg_score:.1f} 分\n"
+                        f"• 期末考需要考取：{needed_rounded:.1f} 分\n"
+                        f"⚠️ 期末考即使考滿分 100 分，總分仍無法達到 60 分及格門檻。"
+                    )
+                    self.show_result(msg, False)
+                else:
+                    needed_ceil = math.ceil(needed * 10) / 10
+                    current_acc = reg_score * 0.3
+                    msg = (
+                        f"📊【暑修 期末考及格目標試算】\n"
+                        f"• 目前平時成績（30%）：{reg_score:.1f} 分（已得 {current_acc:.2f} 分）\n"
+                        f"• 🎯 期末考（70%）至少需要考：{needed_ceil:.1f} 分 才能達到 60 分及格門檻！\n"
+                        f"（期末考滿分 100 分，祝考試順利順暢通關！）"
+                    )
+                    self.show_result(msg, True)
+                return
 
+            # 有填寫期末考成績 -> 正常計算學期成績
+            try:
+                fin_score = float(final_val)
+            except ValueError:
+                self.final.error_text = "請輸入有效數字"
+                raise ValueError("期末考成績請輸入有效數字。")
+
+            total, letter, gpa, passed = calculate_grade(reg_score, fin_score)
+            self.show_result(
+                format_grade_result(
+                    total, letter, gpa, passed, "暑修學期總成績"
+                ),
+                passed,
+            )
+            return
+
+        # -------------------------------------------------------------
+        # 情境 B：非暑修模式 (平時 30% + 期中 30% + 期末 40%)
+        # -------------------------------------------------------------
+        if not midterm_val:
+            self.midterm.error_text = "請輸入期中考成績"
+            raise ValueError("請輸入期中考成績。")
+
+        try:
+            mid_score = float(midterm_val)
+        except ValueError:
+            self.midterm.error_text = "請輸入有效數字"
+            raise ValueError("期中考成績請輸入有效數字。")
+
+        if not (0.0 <= mid_score <= 100.0):
+            self.midterm.error_text = "需介於 0 到 100 分"
+            raise ValueError("期中考成績須介於 0 到 100 分之間。")
+
+        # 使用者只有輸入平時成績和期中考成績（期末考未填）-> 試算期末考需要幾分及格
+        if not final_val:
+            accumulated = reg_score * 0.3 + mid_score * 0.3
+            needed = (60.0 - accumulated) / 0.4
+            if needed <= 0:
+                msg = (
+                    f"📊【期末考及格目標試算】\n"
+                    f"• 平時成績（30%）：{reg_score:.1f} 分\n"
+                    f"• 期中考成績（30%）：{mid_score:.1f} 分\n"
+                    f"• 前兩項累積得分：{accumulated:.2f} 分（已達 60 分門檻）\n"
+                    f"🎉 恭喜！目前累積得分已達標，期末考即使考 0 分也確定順利及格！"
+                )
+                self.show_result(msg, True)
+            elif needed > 100.0:
+                needed_rounded = round(needed, 1)
+                msg = (
+                    f"📊【期末考及格目標試算】\n"
+                    f"• 平時成績（30%）：{reg_score:.1f} 分\n"
+                    f"• 期中考成績（30%）：{mid_score:.1f} 分\n"
+                    f"• 目前累積得分：{accumulated:.2f} 分\n"
+                    f"• 期末考所需分數：{needed_rounded:.1f} 分\n"
+                    f"⚠️ 期末考即使考滿分 100 分，總分仍無法達到 60 分及格門檻，請務必掌握作業或面授加分機會。"
+                )
+                self.show_result(msg, False)
+            else:
+                needed_ceil = math.ceil(needed * 10) / 10
+                msg = (
+                    f"📊【非暑修 期末考及格目標試算】\n"
+                    f"• 平時成績（30%）：{reg_score:.1f} 分\n"
+                    f"• 期中考成績（30%）：{mid_score:.1f} 分\n"
+                    f"• 目前累積得分：{accumulated:.2f} 分\n"
+                    f"• 🎯 期末考（40%）至少需要考：{needed_ceil:.1f} 分 才能達到 60 分及格門檻！\n"
+                    f"（請提早複習備戰，加油！）"
+                )
+                self.show_result(msg, True)
+            return
+
+        # 若使用者三個欄位皆填寫 -> 正常計算學期總成績
+        try:
+            fin_score = float(final_val)
+        except ValueError:
+            self.final.error_text = "請輸入有效數字"
+            raise ValueError("期末考成績請輸入有效數字。")
+
+        total, letter, gpa, passed = calculate_grade(
+            reg_score, fin_score, mid_score
+        )
         self.show_result(
             format_grade_result(total, letter, gpa, passed, "學期總成績"),
             passed,
@@ -1223,7 +1691,9 @@ class GradeCalculator(ft.Column):
         courses = []
         has_error = False
 
-        for score_field, credit_field in zip(self.average_scores, self.average_credits):
+        for score_field, credit_field in zip(
+            self.average_scores, self.average_credits
+        ):
             score_str = (score_field.value or "").strip()
             credit_str = (credit_field.value or "").strip()
 
@@ -1247,12 +1717,16 @@ class GradeCalculator(ft.Column):
             self.show_result("請至少輸入一科成績與學分。")
             return
 
-        total_score, average, letter, gpa, passed = calculate_average_grade(courses)
+        total_score, average, letter, gpa, passed = calculate_average_grade(
+            courses
+        )
         letter_43, gpa_43 = calculate_gpa_43(average)
         self.show_result(
             f"已計算 {len(courses)} 科成績\n"
             f"科目成績加總：{total_score:.1f} 分\n"
-            + format_grade_result(average, letter, gpa, passed, "學期成績平均")
+            + format_grade_result(
+                average, letter, gpa, passed, "學期成績平均"
+            )
             + f"\nGPA（4.3 制）：{letter_43}，積點：{gpa_43:.1f}",
             passed,
         )
