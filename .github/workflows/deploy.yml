@@ -42,6 +42,11 @@ jobs:
         run: |
           flet build web --base-url /nou-study-tools/ --yes
 
+      # 放在這裡：打包完成後，將最外層的驗證檔案複製到打包輸出資料夾
+      - name: Copy Google Verification File
+        run: |
+          cp "$GITHUB_WORKSPACE/google7aa03728a73fed37.html" build/web/
+
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v5
         with:
@@ -57,9 +62,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
-        
-      # 在打包之後，加上這一步把驗證 HTML 複製進去
-      - name: Copy Google Verification File
-        run: |
-          cp google7aa03728a73fed37.html build/web/
-          # 備註：若你的打包輸出目錄是 dist，就改為 cp google7aa03728a73fed37.html dist/
