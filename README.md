@@ -52,6 +52,8 @@ Copyright © 2026 朱家儀. All rights reserved.
 
 > **免責聲明**：本專案為空大學生自行開發之**非官方課業輔助工具**，僅供同學課業規劃與學習交流互助使用。各項修課規定、面授日程與學生成績請一律以國立空中大學官方教務系統與數位學習平台之正式公告為準。
 
+[Terms of Use.md](https://github.com/zhuj05/nou-study-tools/blob/main/TERMS_OF_USE.md)
+
 ---
 
 ## 授權與使用條款 (License)
