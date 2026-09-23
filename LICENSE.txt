@@ -1,4 +1,28 @@
-Copyright (c) 2026 朱家儀. All rights reserved.
+# Proprietary Software License Agreement
 
-本專案之程式原始碼、介面設計及相關文字內容皆為原創作品，受著作權法保護。
-未經著作權人書面同意與正式授權，嚴禁任何形式之複製、重製、修改、散布、轉載或用於任何商業及非商業衍生用途。
+Copyright (c) 2026 朱家儀 (Jia-Yi Zhu). All rights reserved.
+
+---
+
+### 中文條款
+
+本專案之程式原始碼、架構設計、演算法、使用者介面、視覺資產及相關文件均為原創作品，受中華民國著作權法及國際著作權公約保護。
+
+1. **保留所有權利**：著作權人保留對本軟體及其相關素材的所有所有權、智慧財產權與專有權利。
+2. **禁止複製與散布**：未經著作權人事前書面同意與正式授權，任何個人或組織不得以任何形式（包括但不限於原始碼、二進位制代碼、部分片段或改寫）進行複製、重製、散布、分發、公開傳輸、轉載或展示。
+3. **禁止逆向工程**：嚴禁對本軟體進行反編譯（Decompile）、反組譯（Disassemble）、逆向工程（Reverse Engineer），或試圖解析、模擬、提取其核心運作邏輯、架構設計及業務流程。
+4. **禁止衍生開發**：嚴禁以本專案之設計概念、運作方式或架構為基礎，開發任何競爭性質之軟體、衍生作品或商業／非商業替代品。
+5. **免責聲明**：本軟體依「現狀（As-Is）」提供，不包含任何明示或暗示之擔保。
+
+---
+
+### English Version
+
+All source code, architectural designs, algorithms, user interfaces, visual assets, and documentation within this repository are the exclusive proprietary property of the copyright holder and are protected by applicable copyright laws and international treaties.
+
+1. **Reservation of Rights**: The copyright holder retains all right, title, and interest in and to the software, including all intellectual property and proprietary rights.
+2. **Restrictions on Copying and Distribution**: Unauthorized copying, duplication, reproduction, distribution, public transmission, or sublicensing of this software, in whole or in part, via any medium, is strictly prohibited without prior written permission from the copyright holder.
+3. **Reverse Engineering Prohibited**: You may not decompile, disassemble, reverse engineer, or otherwise attempt to derive, reconstruct, or emulate the underlying logic, workflow, structure, or operation of this software.
+4. **No Derivative Works**: Developing competing applications, derivative works, or functional clones based on the concepts, architecture, or functional mechanisms of this software is strictly prohibited.
+5. **Disclaimer of Warranty**: This software is provided "AS IS", without warranty of any kind, express or implied.
+
