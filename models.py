@@ -1,6 +1,8 @@
 """Pure grade-calculation logic and app data."""
 
 import datetime
+import json
+from pathlib import Path
 from typing import NamedTuple
 import flet as ft
 
@@ -37,80 +39,49 @@ GPA_43_SCALE = (
     (60.0, "C-", 1.7),
 )
 
+
 # ----------------------------------------------------------------------
-# 115 學年度結構化行事曆與大考時程資料
+# 結構化行事曆外部 JSON 載入函式
 # ----------------------------------------------------------------------
-ACADEMIC_CALENDAR_DATA_115: dict[str, dict] = {
-    "115_1": {
-        "title": "📌 115學年度 第 1 學期（上學期）",
-        # 主要大考（用於倒數）：(開始日, 結束日, 考試名稱)
-        "major_exams": [
-            (datetime.date(2026, 11, 7), datetime.date(2026, 11, 8), "115上期中考試"),
-            (datetime.date(2027, 1, 9), datetime.date(2027, 1, 10), "115上期末考試"),
-        ],
-        "events": [
-            (datetime.date(2026, 9, 7), "• 115.09.07 ｜ 開學（課程開播）"),
-            (datetime.date(2026, 9, 24), "• 115.09.24 ｜ 115暑學期成績開放網路查詢"),
-            (datetime.date(2026, 9, 28), "•🟢 115.09.25 ~115.09.28 ｜ 中秋節及教師節連假 休4天"),
-            (datetime.date(2026, 10, 11), "•🟢 115.10.09 ~115.10.11 ｜ 國慶日連假 休3天"),
-            (datetime.date(2026, 10, 14), "• 115.10.14 ｜ 寄發115暑成績單"),
-            (datetime.date(2026, 10, 17), "• 115.10.15 ~ 10.17 ｜ 115上學期畢業申請"),
-            
-            (datetime.date(2026, 10, 26), "•🟢 115.10.24 ~115.10.26 ｜ 光復節連假 休3天"),                        
-            (datetime.date(2026, 11, 30), "• 115.10.25 ~115.11.30 ｜ 115下招生網路報名"),
-            (datetime.date(2026, 11, 8), "• ⭐ 115.11.07 ～ 115.11.08 ｜ 115上期中考試"),
-            (datetime.date(2026, 11, 15), "• 115.11.14 ～ 11.15 ｜ 115上期中考補考"),
-            (datetime.date(2026, 11, 14), "• 115.11.24｜ 發送115下選課通知、公告註冊選課注意事項"),
-            (datetime.date(2026, 11, 25), "• 115.11.25 ｜ 115上期中考試成績開放網路查詢"),
-            
-            (datetime.date(2026, 12, 20), "• 115.12.01 ～ 115.12.20 ｜ 115下舊生網路選課繳費"),
-            (datetime.date(2026, 12, 31), "• 115.12.23 ～ 115.12.31 ｜ 115下線上逾期補選課、補繳費"),
-            (datetime.date(2026, 12, 27), "•🟢 115.12.25 ~115.12.27 ｜ 行憲紀念日連假 休3天"),            
-            
-            (datetime.date(2027, 1, 3), "•🟢 116.01.01 ~116.01.03 ｜ 2027元旦 休3天"),
-            (datetime.date(2027, 1, 10), "• ⭐ 116.01.09 ～ 116.01.10 ｜ 115上期末考試"),
-            (datetime.date(2027, 1, 17), "• 116.01.16 ～ 116.01.17 ｜ 115上期末考補考"),
-            (datetime.date(2027, 1, 29), "• 116.01.29 ｜ 115上學期成績開放網路查詢"),
-            (datetime.date(2027, 2, 10), "•🟢 116.02.04 ~116.02.10 ｜ 春節假期 休7天"),
-             (datetime.date(2027, 2, 22), "• 116.02.22 ｜ 寄發115上成績單"),
-            
-        ],
-    },
-    "115_2": {
-        "title": "📌 115學年度 第 2 學期（下學期）",
-        "major_exams": [
-            (datetime.date(2027, 4, 17), datetime.date(2027, 4, 18), "115下期中考試"),
-            (datetime.date(2027, 6, 19), datetime.date(2027, 6, 20), "115下期末考試"),
-        ],
-        "events": [
-            (datetime.date(2027, 2, 15), "• 116.02.15 ｜ 115下學期開學（課程開播）"),
-            (datetime.date(2027, 3, 1), "•🟢 116.02.27 ~ 03.01 ｜ 和平紀念日 休3天"),
-            (datetime.date(2027, 4, 6), "•🟢 116.04.03 ~ 04.06 ｜ 兒童節、清明節 休4天"),
-            
-            (datetime.date(2027, 4, 18), "• ⭐ 116.04.17 ～ 04.18 ｜ 115下期中考試"),
-            (datetime.date(2027, 4, 25), "• 116.04.24 ～ 04.25 ｜ 115下期中考補考"),
-            (datetime.date(2027, 5, 2), "•🟢 116.04.30 ~116.05.02 ｜ 勞動節 休3天"),  
-            (datetime.date(2027, 5, 20), "• 116.05.01 ～ 05.20 ｜ 116暑期網路選課"),
-            (datetime.date(2027, 5, 31), "• 116.05.23 ～ 05.31 ｜ 116暑期線上逾期補選課"),
-            (datetime.date(2027, 6, 9), "•🟢 116.06.09 ｜ 端午節 休1天"),
-            
-            (datetime.date(2027, 6, 20), "• ⭐ 116.06.19 ～ 06.20 ｜ 115下期末考試"),
-            (datetime.date(2027, 6, 27), "• 116.06.26 ～ 06.27 ｜ 115下期末考補考"),
-        ],
-    },
-    "116_summer": {
-        "title": "📌 116學年度 暑期",
-        "major_exams": [],
-        "events": [
-            (datetime.date(2027, 9, 15), "•🟢 116.09.15 ｜ 中秋節 休1天"),
-            (datetime.date(2027, 9, 28), "•🟢 116.09.28 ｜ 教師節 休1天"),
-            (datetime.date(2027, 10, 11), "•🟢 116.10.09 ~ 10.11 ｜ 國慶日 休3天"),
-            (datetime.date(2027, 10, 25), "•🟢 116.10.23 ~ 10.25 ｜ 光復節 休3天"),
-            (datetime.date(2027, 12, 26), "•🟢 116.12.24 ~ 12.26 ｜ 行憲紀念日 休3天"),
-            (datetime.date(2028, 1, 2), "•🟢 116.12.31 ~ 117.01.02 ｜ 2028元旦 休3天"),
-        ],
-    },
-}
+def load_calendar_data() -> dict[str, dict]:
+    """載入同目錄下的 calendar_data.json 並解析日期格式為 datetime.date。"""
+    json_path = Path(__file__).parent / "calendar_data.json"
+    if not json_path.exists():
+        return {}
+
+    with open(json_path, "r", encoding="utf-8") as f:
+        raw_data = json.load(f)
+
+    parsed_data = {}
+    for sem_key, sem_val in raw_data.items():
+        # 解析 major_exams: (開始日, 結束日, 考試名稱)
+        major_exams = [
+            (
+                datetime.date.fromisoformat(exam["start"]),
+                datetime.date.fromisoformat(exam["end"]),
+                exam["name"],
+            )
+            for exam in sem_val.get("major_exams", [])
+        ]
+
+        # 解析 events: (結束日, 顯示文字)
+        events = [
+            (datetime.date.fromisoformat(ev["end_date"]), ev["text"])
+            for ev in sem_val.get("events", [])
+        ]
+
+        parsed_data[sem_key] = {
+            "label": sem_val.get("label", sem_key),
+            "title": sem_val.get("title", ""),
+            "major_exams": major_exams,
+            "events": events,
+        }
+
+    return parsed_data
+
+
+# 啟動時讀取快取
+ACADEMIC_CALENDAR_DATA: dict[str, dict] = load_calendar_data()
 
 
 class GradeCalculationError(ValueError):
@@ -211,17 +182,28 @@ def format_grade_result(
 # 重要行事曆檢視元件（考試即時倒數 + 過期自動隱藏 + 水平單選框）
 # ----------------------------------------------------------------------
 def build_academic_calendar_view(page: ft.Page) -> ft.Container:
-    """建構 115 學年度重要行事曆畫面。
+    """建構重要行事曆畫面。
 
     - 頂部自動計算並顯示最近的「期中考 / 期末考倒數天數」（考完隔天自動隱藏）。
     - 根據系統當前日期，自動過濾已結束的事件（只顯示進行中與未來日程）。
-    - 上方提供水平單選框切換 115上 / 115下 / 115暑。
+    - 上方依據 JSON 動態生成單選框切換學期。
     """
     today = datetime.date.today()
 
+    # 防呆：若無資料直接回傳提示
+    if not ACADEMIC_CALENDAR_DATA:
+        return ft.Container(
+            content=ft.Text("尚無行事曆資料，請確認 calendar_data.json 是否存在。", color=ft.Colors.GREY_500),
+            padding=10,
+        )
+
+    # 動態取得所有學期的 key，預設選取第一筆
+    available_keys = list(ACADEMIC_CALENDAR_DATA.keys())
+    default_sem_key = available_keys[0]
+
     def _get_countdown_badge(semester_key: str) -> ft.Control | None:
         """計算並回傳最近考試的倒數卡片；若考試全數結束則回傳 None。"""
-        data = ACADEMIC_CALENDAR_DATA_115.get(semester_key, {})
+        data = ACADEMIC_CALENDAR_DATA.get(semester_key, {})
         major_exams = data.get("major_exams", [])
 
         for start_date, end_date, exam_name in major_exams:
@@ -267,7 +249,7 @@ def build_academic_calendar_view(page: ft.Page) -> ft.Container:
         return None
 
     def _get_active_events_controls(semester_key: str) -> list[ft.Control]:
-        data = ACADEMIC_CALENDAR_DATA_115.get(semester_key, {})
+        data = ACADEMIC_CALENDAR_DATA.get(semester_key, {})
         title = data.get("title", "")
         events = data.get("events", [])
 
@@ -313,9 +295,9 @@ def build_academic_calendar_view(page: ft.Page) -> ft.Container:
 
         return rows
 
-    # 下方顯示日程文字的容器（預設顯示 115 上）
+    # 下方顯示日程文字的容器（預設顯示第一筆學期）
     calendar_content = ft.Column(
-        controls=_get_active_events_controls("115_1"),
+        controls=_get_active_events_controls(default_sem_key),
         spacing=8,
         horizontal_alignment=ft.CrossAxisAlignment.START,
     )
@@ -325,18 +307,19 @@ def build_academic_calendar_view(page: ft.Page) -> ft.Container:
         calendar_content.controls = _get_active_events_controls(selected_key)
         page.update()
 
-    # 水平排列的單選框
+    # 水平排列的單選框：依 JSON 內容動態產出
+    radio_buttons = [
+        ft.Radio(value=k, label=v["label"])
+        for k, v in ACADEMIC_CALENDAR_DATA.items()
+    ]
+
     semester_radio_group = ft.RadioGroup(
         content=ft.Row(
-            controls=[
-                ft.Radio(value="115_1", label="115 上"),
-                ft.Radio(value="115_2", label="115 下"),
-                ft.Radio(value="116_summer", label="116 暑"),
-            ],
+            controls=radio_buttons,
             alignment=ft.MainAxisAlignment.CENTER,
             spacing=15,
         ),
-        value="115_1",
+        value=default_sem_key,
         on_change=on_radio_change,
     )
 
