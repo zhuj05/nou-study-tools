@@ -1,56 +1,32 @@
-PROPRIETARY AND CONFIDENTIAL SOFTWARE LICENSE AGREEMENT
+Project License & Usage Terms
 Copyright (c) 2026 朱家儀 (Jia-Yi Zhu). All rights reserved.
 ================================================================================
-【中文條款】
-本專案之程式原始碼、架構設計、演算法、使用者介面、視覺素材及相關技術文件
-均為原創作品，受著作權法及相關國際智慧財產權公約之保護。
-一、保留所有權利
-著作權人保留對本軟體及其相關素材之所有所有權、專利權、商標權、營業秘密與
-其他智慧財產權。
-二、禁止複製與散布
-未經著作權人事先書面許可與正式授權，任何人或組織均不得以任何形式或透過
-任何媒介（包括但不限於原始碼、二進位檔案、代碼片段或改寫代碼）進行複製、
-重製、散布、分發、公開展示、公開傳輸、轉載或出租。
-三、禁止逆向工程與運作仿製
-嚴禁對本軟體進行反編譯（Decompile）、反組譯（Disassemble）、逆向工程
-（Reverse Engineer），或以任何方式分析、拆解、還原、模擬或提取本專案之
-運作機制、業務邏輯、架構設計、演算法及資料流程。
-四、禁止衍生作品與競品開發
-嚴禁以本專案之功能邏輯、介面互動模式、架構設計或運作概念為基礎，直接或
-間接開發任何競爭性質之軟體產品、衍生作品、功能複製品或替代方案。
-五、免責聲明
-本軟體依「現狀（AS-IS）」提供，著作權人不對本軟體提供任何明示或暗示之
-保證，亦不對因使用或無法使用本軟體所衍生之任何直接或間接損害承擔法律責任。
+【中文說明】
+歡迎交流與參考本專案！為了尊重原創與學術倫理，請共同遵守以下約定：
+1. 學習與研究交流：
+本專案之原始碼與架構僅供個人研讀、觀摩、學習及技術探討使用。
+2. 禁止抄襲與直接交差：
+請勿直接複製貼上程式碼片段，亦不得將本專案的全部或部分內容
+轉作個人課程作業、專題發表、學術報告或各類競賽參賽作品。
+3. 著作權與轉載規範：
+未經原作者書面同意，請勿將本專案重新打包上傳、公開散布或移作商業用途。
+若在研究或文章中引用本專案之設計概念，請務必清楚註明原作者與原始專案連結。
+如有任何技術問題或合作想法，歡迎提出討論與交流！
 ================================================================================
 【ENGLISH VERSION】
-All source code, architectural designs, algorithms, user interfaces, visual
-assets, and technical documentation within this repository are the exclusive
-proprietary property of the copyright holder and are protected by applicable
-copyright laws, trade secret laws, and international intellectual property
-treaties.
-1. RESERVATION OF RIGHTS
-The copyright holder retains all right, title, and interest in and to the
-software, including without limitation all intellectual property, proprietary,
-and moral rights.
-2. RESTRICTIONS ON COPYING AND DISTRIBUTION
-Unauthorized copying, reproduction, distribution, sublicensing, publishing,
-public transmission, broadcasting, or sharing of this software or any part
-thereof, in any format or medium (whether as source code, object code, or
-derived code), is strictly prohibited without the prior written consent of the
-copyright holder.
-3. REVERSE ENGINEERING AND EXTRACTION PROHIBITED
-You may not, directly or indirectly, decompile, disassemble, reverse engineer,
-or otherwise attempt to derive, inspect, decipher, extract, or reconstruct the
-underlying logic, workflows, internal algorithms, architecture, or functional
-mechanisms of this software.
-4. NO DERIVATIVE OR COMPETING WORKS
-You may not use the functional logic, interaction design, operating principles,
-or architectural concepts of this software to build, modify, or distribute any
-competing applications, derivative works, functional clones, or replacement
-products.
-5. DISCLAIMER OF WARRANTY
-THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT
-HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM OR IN
-CONNECTION WITH THE SOFTWARE.
+Thank you for visiting this project! To respect original work and maintain
+academic integrity, please adhere to the following terms:
+1. Personal Learning & Research Only:
+The source code and architecture in this repository are shared solely for
+personal study, research, technical discussion, and review purposes.
+2. No Plagiarism or Direct Submission:
+Please do not copy-paste code snippets from this repository. You may not
+submit any part or the entirety of this project as your own coursework,
+degree project, academic report, or competition entry.
+3. Attribution & Distribution:
+Redistributing, repackaging, or using this project for commercial purposes
+without prior written consent is strictly prohibited. If you reference
+concepts or structural patterns from this work in your research, proper
+attribution to the original author and project link is required.
+If you have questions, feedback, or ideas for collaboration, feel free to open
+an issue or reach out!
