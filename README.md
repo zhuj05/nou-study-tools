@@ -56,7 +56,7 @@ Copyright © 2026 朱家儀. All rights reserved.
 
 ---
 
-## 授權與使用條款 (License)
+## 使用條款 (License)
 
 > 本專案為原創開發，歡迎學習交流。嚴禁抄襲作為個人作業或專題繳交，詳細規範請參閱 [LICENSE.md](https://github.com/zhuj05/nou-study-tools/tree/main?tab=License-1-ov-file)
 
