@@ -4,7 +4,7 @@ version = "1.0.0"
 description = "Calculate weighted semester scores and GPA grades."
 requires-python = ">=3.12"
 authors = [
-    
+    "name" = "zhuj05"
 ]
 dependencies = [
     "flet"
