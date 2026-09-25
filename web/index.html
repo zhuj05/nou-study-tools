@@ -1,14 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant-TW">
 <head>
+  <!-- Google 網站所有權驗證標籤 -->
   <meta name="google-site-verification" content="1Wy4jG4tyMn7cJBbsXLwztKRTB2zbVQAPV8Pqn4m_68" />
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="空大學業小幫手">
+  
+  <!-- SEO 核心標籤與關鍵字優化 -->
+  <title>空大學業小幫手 - 國立空中大學成績試算、行事曆與學習工具</title>
+  <meta name="description" content="專為國立空中大學（NOU）學生設計的學業輔助小工具，提供一般學期與暑期(暑修)成績分數試算、考試與作業日程紀錄、學年行事曆，輕鬆掌握空大學習進度。">
+  <meta name="keywords" content="空大, 國立空中大學, NOU, 空大學業小幫手, 空大成績計算, 空大暑修, 空大行事曆, 作業日程, 學習工具">
+  <meta name="robots" content="index, follow">
 
-  <!-- iOS meta tags & icons -->
+  <!-- Open Graph 社群分享預覽（LINE、FB、Discord 等） -->
+  <meta property="og:title" content="空大學業小幫手 - 國立空中大學成績試算、行事曆與學習工具">
+  <meta property="og:description" content="專為空中大學學生打造的學業輔助小工具，提供學期與暑期成績試算、考試作業日程管理。">
+  <meta property="og:url" content="https://zhuj05.github.io/nou-study-tools/">
+  <meta property="og:type" content="website">
+
+  <!-- iOS PWA 標籤與圖示 -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="空大學業小幫手">
@@ -17,11 +29,10 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>空大學業小幫手</title>
   <link rel="manifest" href="manifest.json">
 
   <style>
-    /* 全螢幕自訂載入畫面樣式（配合你的暗黑模式主題） */
+    /* 全螢幕自訂載入畫面樣式（配合暗黑模式主題） */
     #custom-loading-screen {
       position: fixed;
       top: 0;
@@ -65,9 +76,36 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    /* 供搜尋引擎閱讀的預留區塊，視覺上由 Loading 遮罩覆蓋，渲染完成後自動被 Canvas 取代 */
+    #seo-content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 20px;
+      box-sizing: border-box;
+      color: #e2e8f0;
+      font-family: sans-serif;
+      z-index: 1;
+    }
   </style>
 </head>
 <body style="margin: 0; padding: 0; background-color: #0f172a;">
+
+  <!-- SEO 爬蟲文字區塊（讓 Googlebot 能直接索引文字與核心功能） -->
+  <main id="seo-content">
+    <h1>空大學業小幫手 (NOU Study Tools)</h1>
+    <p>歡迎使用國立空中大學學業小幫手！本工具專為空大學生打造，協助您輕鬆規劃學分、計算畢業門檻與掌握修課進度。</p>
+    <section>
+      <h2>主要功能</h2>
+      <ul>
+        <li>一般學期與暑期(暑修)成績分數試算</li>
+        <li>空大的學生考試與作業日程紀錄與學年行事曆</li>
+        <li>空大學生常用學習工具整合</li>
+      </ul>
+    </section>
+  </main>
 
   <!-- 自訂 Loading 遮罩層 -->
   <div id="custom-loading-screen">
@@ -107,11 +145,9 @@
   <script src="flutter.js" defer></script>
   <script>
     window.addEventListener('load', function(ev) {
-      // 下載 main.dart.js 並啟動引擎
+      // 停用 Flutter 預設 SW，由自訂 sw.js 接管
       _flutter.loader.loadEntrypoint({
-        serviceWorker: {
-          serviceWorkerVersion: {{flutter_service_worker_version}},
-        },
+        serviceWorker: null,
         onEntrypointLoaded: function(engineInitializer) {
           engineInitializer.initializeEngine().then(function(appRunner) {
             appRunner.runApp();
@@ -121,19 +157,20 @@
     });
   </script>
 
+  <!-- 註冊自訂 Service Worker 加速載入 -->
   <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then((registration) => {
-          console.log('✅ Service Worker 註冊成功，範圍:', registration.scope);
-        })
-        .catch((error) => {
-          console.error('❌ Service Worker 註冊失敗:', error);
-        });
-    });
-  }
-</script>
-  
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((registration) => {
+            console.log('✅ Service Worker 註冊成功，範圍:', registration.scope);
+          })
+          .catch((error) => {
+            console.error('❌ Service Worker 註冊失敗:', error);
+          });
+      });
+    }
+  </script>
+
 </body>
 </html>
