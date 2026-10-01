@@ -61,3 +61,6 @@ Copyright © 2026 朱家儀. All rights reserved.
 
 > 本專案為原創開發，歡迎學習交流。嚴禁抄襲作為個人作業或專題繳交，詳細規範請參閱 [LICENSE.md](https://github.com/zhuj05/nou-study-tools/tree/main?tab=License-1-ov-file)
 
+
+<h3 align=left>Support</h3>
+<a href="https://www.buymeacoffee.com/zhuj70553" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
