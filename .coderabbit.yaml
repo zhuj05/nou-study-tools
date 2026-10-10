@@ -1,13 +1,10 @@
-# CodeRabbit 設定檔
-version: "2"
-language: "zh-TW" # 指定繁體中文回覆
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+version: 2
+language: "zh-TW"
 
 reviews:
-  # 是否開啟高層級摘要（列出改動重點）
   high_level_summary: true
-  # 是否開啟條列式導覽（檔案異動說明）
   walkthrough: true
-  # 自動審查的嚴格度 / 註解程度 (可選: chill, assertive 等，預設 chill 較溫和實用)
   profile: "chill"
 
 chat:
