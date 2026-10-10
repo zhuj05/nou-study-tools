@@ -365,7 +365,7 @@ class GradeCalculator(ft.Column):
                     spans=[
                         ft.TextSpan(
                             "nou.tools.dev@gmail.com",
-                            url="mailto:",
+                            url="mailto:nou.tools.dev@gmail.com",
                             style=ft.TextStyle(
                                 color="#3B82F6",
                                 decoration=ft.TextDecoration.UNDERLINE,
@@ -1481,7 +1481,7 @@ class GradeCalculator(ft.Column):
                 color=shadow_color,
                 blur_radius=8,
                 offset=ft.Offset(0, 2),
-            ),
+            )
 
         for item in self.tracker_cards_data:
             item["container"].border = ft.Border.all(
