@@ -1,0 +1,344 @@
+"""Pure grade-calculation logic and app data."""
+
+import datetime
+import json
+from pathlib import Path
+from typing import NamedTuple
+import flet as ft
+
+# 項目格式: (名稱, 連結, 背景顏色, 文字顏色)
+SHORTCUTS: list[tuple[str, str, str, str]] = [
+    ("空大首頁", "https://www.nou.edu.tw/", "#E6FFFA", "#006D5B"),
+    ("數位學習平台", "https://uu.nou.edu.tw/mooc/index.php", "#EBF8FF", "#2B6CB0"),
+    ("教務行政資訊系統", "https://noustud.nou.edu.tw/", "#EDF2F7", "#4A5568"),
+    ("空大出版中心", "https://www2.nou.edu.tw/pd/index.aspx", "#FEFCBF", "#744210"),
+    ("空大教務處", "https://studadm.nou.edu.tw/", "#FFF5F5", "#9B2C2C"),
+    ("視訊面授教室", "https://vc.nou.edu.tw/", "#FFEDD5", "#C2410C"),
+    ("學習指導中心", "https://www.nou.edu.tw/Home/Center", "#F3E8FF", "#6B21A8"),
+    ("行事曆", "https://studadm.nou.edu.tw/FileManage/select_files#cal", "#E2E8F0", "#334155"),
+]
+
+# 4.0 制評分標準表 (最低分門檻, 等第, 積點)
+GPA_40_SCALE = (
+    (80.0, "A", 4.0),
+    (70.0, "B", 3.0),
+    (60.0, "C", 2.0),
+    (50.0, "D", 1.0),
+)
+
+# 4.3 制評分標準表 (最低分門檻, 等第, 積點)
+GPA_43_SCALE = (
+    (90.0, "A+", 4.3),
+    (85.0, "A", 4.0),
+    (80.0, "A-", 3.7),
+    (77.0, "B+", 3.3),
+    (73.0, "B", 3.0),
+    (70.0, "B-", 2.7),
+    (67.0, "C+", 2.3),
+    (63.0, "C", 2.0),
+    (60.0, "C-", 1.7),
+)
+
+
+# ----------------------------------------------------------------------
+# 結構化行事曆外部 JSON 載入函式
+# ----------------------------------------------------------------------
+def load_calendar_data() -> dict[str, dict]:
+    """載入同目錄下的 calendar_data.json 並解析日期格式為 datetime.date。"""
+    json_path = Path(__file__).parent / "calendar_data.json"
+    if not json_path.exists():
+        return {}
+
+    with open(json_path, "r", encoding="utf-8") as f:
+        raw_data = json.load(f)
+
+    parsed_data = {}
+    for sem_key, sem_val in raw_data.items():
+        # 解析 major_exams: (開始日, 結束日, 考試名稱)
+        major_exams = [
+            (
+                datetime.date.fromisoformat(exam["start"]),
+                datetime.date.fromisoformat(exam["end"]),
+                exam["name"],
+            )
+            for exam in sem_val.get("major_exams", [])
+        ]
+
+        # 解析 events: (結束日, 顯示文字)
+        events = [
+            (datetime.date.fromisoformat(ev["end_date"]), ev["text"])
+            for ev in sem_val.get("events", [])
+        ]
+
+        parsed_data[sem_key] = {
+            "label": sem_val.get("label", sem_key),
+            "title": sem_val.get("title", ""),
+            "major_exams": major_exams,
+            "events": events,
+        }
+
+    return parsed_data
+
+
+# 啟動時讀取快取
+ACADEMIC_CALENDAR_DATA: dict[str, dict] = load_calendar_data()
+
+
+class GradeCalculationError(ValueError):
+    """自定義成績計算錯誤，便於 UI 攔截與顯示精準訊息。"""
+    pass
+
+
+def _validate_score(score: float, label: str = "成績") -> None:
+    """驗證單一成績是否介於 0 到 100 之間。"""
+    if not (0.0 <= score <= 100.0):
+        raise GradeCalculationError(f"{label}須介於 0 到 100 分之間（目前輸入：{score}）。")
+
+
+def grade_details(total: float) -> tuple[float, str, float, bool]:
+    """計算並回傳單科成績的總分、等第、4.0 制 GPA 以及是否及格。"""
+    rounded_total = round(total, 2)
+
+    for threshold, letter, gpa in GPA_40_SCALE:
+        if rounded_total >= threshold:
+            return rounded_total, letter, gpa, rounded_total >= 60.0
+
+    return rounded_total, "F", 0.0, False
+
+
+def calculate_grade(
+    regular: float, final: float, midterm: float | None = None
+) -> tuple[float, str, float, bool]:
+    """計算單科加權學期成績。
+
+    - 暑修（midterm 為 None）：平時 30% + 期末 70%
+    - 非暑修：平時 30% + 期中 30% + 期末 40%
+    """
+    _validate_score(regular, "平時成績")
+    _validate_score(final, "期末考成績")
+    if midterm is not None:
+        _validate_score(midterm, "期中考成績")
+        total = regular * 0.3 + midterm * 0.3 + final * 0.4
+    else:
+        total = regular * 0.3 + final * 0.7
+
+    return grade_details(total)
+
+
+def calculate_average_grade(
+    courses: list[tuple[float, float]],
+) -> tuple[float, float, str, float, bool]:
+    """依多門課程之成績與學分，計算學期加權總平均。
+
+    :param courses: 每門課的 (成績, 學分數) 串列
+    :return: (原始成績加總, 學期加權平均, 4.0等第, 4.0積點, 是否及格)
+    """
+    if not courses:
+        raise GradeCalculationError("請至少輸入一門科目的成績與學分。")
+
+    total_credits = 0.0
+    weighted_sum = 0.0
+    score_sum = 0.0
+
+    for idx, (score, credits) in enumerate(courses, start=1):
+        _validate_score(score, f"第 {idx} 科成績")
+        if credits <= 0:
+            raise GradeCalculationError(f"第 {idx} 科學分數必須大於 0。")
+
+        total_credits += credits
+        weighted_sum += score * credits
+        score_sum += score
+
+    if total_credits == 0:
+        raise GradeCalculationError("學分總和不可為 0。")
+
+    weighted_average = round(weighted_sum / total_credits, 2)
+    _, letter, gpa, passed = grade_details(weighted_average)
+    return round(score_sum, 1), weighted_average, letter, gpa, passed
+
+
+def calculate_gpa_43(average: float) -> tuple[str, float]:
+    """將學期平均成績轉換為 4.3 制 GPA 等第與積點。"""
+    rounded_average = round(average, 2)
+    for threshold, letter, gpa in GPA_43_SCALE:
+        if rounded_average >= threshold:
+            return letter, gpa
+    return "F", 0.0
+
+
+def format_grade_result(
+    total: float, letter: str, gpa: float, passed: bool, title: str
+) -> str:
+    """格式化計算結果為易讀之多行文字訊息。"""
+    status = "及格" if passed else "不及格"
+    return (
+        f"{title}：{total:.1f} 分\n"
+        f"狀態：{status}\n"
+        f"GPA（4.0 制）：{gpa:.1f}（{letter}）"
+    )
+
+
+# ----------------------------------------------------------------------
+# 重要行事曆檢視元件（考試即時倒數 + 過期自動隱藏 + 水平單選框）
+# ----------------------------------------------------------------------
+def build_academic_calendar_view(page: ft.Page) -> ft.Container:
+    """建構重要行事曆畫面。
+
+    - 頂部自動計算並顯示最近的「期中考 / 期末考倒數天數」（考完隔天自動隱藏）。
+    - 根據系統當前日期，自動過濾已結束的事件（只顯示進行中與未來日程）。
+    - 上方依據 JSON 動態生成單選框切換學期。
+    """
+    today = datetime.date.today()
+
+    # 防呆：若無資料直接回傳提示
+    if not ACADEMIC_CALENDAR_DATA:
+        return ft.Container(
+            content=ft.Text("尚無行事曆資料，請確認 calendar_data.json 是否存在。", color=ft.Colors.GREY_500),
+            padding=10,
+        )
+
+    # 動態取得所有學期的 key，預設選取第一筆
+    available_keys = list(ACADEMIC_CALENDAR_DATA.keys())
+    default_sem_key = available_keys[0]
+
+    def _get_countdown_badge(semester_key: str) -> ft.Control | None:
+        """計算並回傳最近考試的倒數卡片；若考試全數結束則回傳 None。"""
+        data = ACADEMIC_CALENDAR_DATA.get(semester_key, {})
+        major_exams = data.get("major_exams", [])
+
+        for start_date, end_date, exam_name in major_exams:
+            if today < start_date:
+                days_left = (start_date - today).days
+                return ft.Container(
+                    bgcolor="#EFF6FF",
+                    border=ft.Border.all(1, "#3B82F6"),
+                    border_radius=8,
+                    padding=10,
+                    content=ft.Row(
+                        controls=[
+                            ft.Icon(ft.Icons.TIMER_OUTLINED, color="#2563EB", size=20),
+                            ft.Text(
+                                f"距離【{exam_name}】還有 {days_left} 天！",
+                                size=14,
+                                weight=ft.FontWeight.BOLD,
+                                color="#1D4ED8",
+                            ),
+                        ],
+                        alignment=ft.MainAxisAlignment.CENTER,
+                    ),
+                )
+            elif start_date <= today <= end_date:
+                return ft.Container(
+                    bgcolor="#FEF2F2",
+                    border=ft.Border.all(1, "#EF4444"),
+                    border_radius=8,
+                    padding=10,
+                    content=ft.Row(
+                        controls=[
+                            ft.Icon(ft.Icons.LOCAL_FIRE_DEPARTMENT, color="#DC2626", size=20),
+                            ft.Text(
+                                f"🔥【{exam_name}】今日考試進行中，加油！",
+                                size=14,
+                                weight=ft.FontWeight.BOLD,
+                                color="#DC2626",
+                            ),
+                        ],
+                        alignment=ft.MainAxisAlignment.CENTER,
+                    ),
+                )
+        return None
+
+    def _get_active_events_controls(semester_key: str) -> list[ft.Control]:
+        data = ACADEMIC_CALENDAR_DATA.get(semester_key, {})
+        title = data.get("title", "")
+        events = data.get("events", [])
+
+        rows: list[ft.Control] = []
+
+        # 1. 考試倒數提醒卡片（有即將到來的大考時才插入）
+        countdown_card = _get_countdown_badge(semester_key)
+        if countdown_card:
+            rows.append(countdown_card)
+
+        # 2. 學期標題
+        rows.append(
+            ft.Text(
+                title,
+                size=16,
+                weight=ft.FontWeight.BOLD,
+                color=ft.Colors.PRIMARY,
+            )
+        )
+
+        # 3. 過濾只保留未結束或進行中的事件（今天 <= 結束日期）
+        active_events = [text for end_date, text in events if today <= end_date]
+
+        if active_events:
+            for text in active_events:
+                is_key_exam = "⭐" in text
+                rows.append(
+                    ft.Text(
+                        text,
+                        size=14,
+                        weight=ft.FontWeight.BOLD if is_key_exam else ft.FontWeight.NORMAL,
+                        color="#2563EB" if is_key_exam else None,
+                    )
+                )
+        else:
+            rows.append(
+                ft.Text(
+                    "🎉 本學期重要日程已全數結束或尚未開始公布！",
+                    size=14,
+                    color=ft.Colors.GREY_500,
+                )
+            )
+
+        return rows
+
+    # 下方顯示日程文字的容器（預設顯示第一筆學期）
+    calendar_content = ft.Column(
+        controls=_get_active_events_controls(default_sem_key),
+        spacing=8,
+        horizontal_alignment=ft.CrossAxisAlignment.START,
+    )
+
+    def on_radio_change(e: ft.ControlEvent) -> None:
+        selected_key = e.control.value
+        calendar_content.controls = _get_active_events_controls(selected_key)
+        page.update()
+
+    # 水平排列的單選框：依 JSON 內容動態產出
+    radio_buttons = [
+        ft.Radio(value=k, label=v["label"])
+        for k, v in ACADEMIC_CALENDAR_DATA.items()
+    ]
+
+    semester_radio_group = ft.RadioGroup(
+        content=ft.Row(
+            controls=radio_buttons,
+            alignment=ft.MainAxisAlignment.CENTER,
+            spacing=15,
+        ),
+        value=default_sem_key,
+        on_change=on_radio_change,
+    )
+
+    return ft.Container(
+        content=ft.Column(
+            controls=[
+                ft.Text("📅 重要行事曆日程", size=18, weight=ft.FontWeight.BOLD),
+                semester_radio_group,
+                ft.Divider(height=1, thickness=1),
+                calendar_content,
+                ft.Divider(height=1, thickness=1),
+                ft.Text(
+                    "※ 系統已自動過濾過期事件；實際時程請以校方教務處最新公告為準",
+                    size=12,
+                    color=ft.Colors.GREY_600,
+                ),
+            ],
+            spacing=10,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        ),
+        padding=10,
+    )

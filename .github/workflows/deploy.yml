@@ -1,0 +1,66 @@
+name: Deploy Flet App to GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flet
+
+      - name: Build Web App
+        run: |
+          flet build web --base-url /nou-study-tools/ --yes
+
+      # 打包完成後，將驗證檔、robots.txt、sitemap.xml 複製到打包輸出目錄 build/web
+      - name: Copy SEO and Verification Files
+        run: |
+          cp "$GITHUB_WORKSPACE/google7aa03728a73fed37.html" build/web/
+          cp "$GITHUB_WORKSPACE/web/robots.txt" build/web/
+          cp "$GITHUB_WORKSPACE/web/sitemap.xml" build/web/
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: build/web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

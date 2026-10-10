@@ -1,0 +1,66 @@
+# 🎓 空大學期成績與課業進度小幫手 (nou-study-tools)
+[![License](https://img.shields.io/badge/License-All_Rights_Reserved-red.svg)](#-版權與授權宣告-license)
+
+一款專為空大（NOU）同學打造的**輕量、免安裝、免填帳密**的線上課業輔助工具。跨平台點開即用，不佔裝置容量，手機與電腦皆能順暢操作！
+
+🔗 **線上正式版網址**：[https://zhuj05.github.io/nou-study-tools/](https://zhuj05.github.io/nou-study-tools/)
+
+---
+
+## 🌟 核心特色
+
+- **免帳密零風險**：不索取學號、密碼與個人隱私，使用安全無顧慮。
+- **免安裝隨開即用**：純前端本機運算，不佔用裝置儲存空間。
+- **跨平台全支援**：電腦、平板與手機各作業系統皆能順暢運行。
+
+---
+
+## ⭐ 5 大核心功能
+
+1. **單科成績試算與期末及格門檻推算**
+2. **學期多科成績加權平均與 GPA 計算**
+3. **考試與作業日期追蹤紀錄（支援 LINE 複製與 Excel 匯出）**
+4. **學年度重要行事曆日程速查與大考倒數**
+5. **常用校園官方網站快速捷徑**
+
+---
+
+## 📱 最佳使用與瀏覽建議
+
+- **桌上型電腦 / 筆電**：
+  - 建議使用 Chrome、Edge 或 Safari 開啟。
+  - **加入書籤（我的最愛）**：可按鍵盤 `Ctrl + D`（Mac 為 `Cmd + D`）將本工具加入書籤列，隨點隨用最方便。
+- **Android 手機 / 平板**：
+  - 建議使用 **Chrome** 瀏覽器開啟。
+  - 點選瀏覽器選單「加到主螢幕」，即可像 App 一樣從桌面快速啟動。
+- **iOS (iPhone / iPad)**：
+  - 建議使用 **Safari** 瀏覽器開啟。
+  - 點選分享按鈕「加入主畫面」，享有全螢幕獨立 App 操作體驗。
+
+---
+
+## ✨ 實用貼心設計
+
+- 🌙 **暗黑模式**：支援深色／淺色主題切換，夜間使用溫和不刺眼。
+- 🔍 **字體縮放**：可依個人視力需求隨時放大或縮小字級。
+- 📋 **LINE 友善格式**：進度資料一鍵複製，排版整齊清晰。
+
+---
+
+## 📄 版權與免責聲明
+
+Copyright © 2026 朱家儀. All rights reserved.
+
+> **免責聲明**：本專案為空大學生自行開發之**非官方課業輔助工具**，僅供同學課業規劃與學習交流互助使用。各項修課規定、面授日程與學生成績請一律以國立空中大學官方教務系統與數位學習平台之正式公告為準。
+
+[TERMS_OF_USE.md](https://github.com/zhuj05/nou-study-tools/blob/main/TERMS_OF_USE.md)
+
+---
+
+## 使用條款 (License)
+
+> 本專案為原創開發，歡迎學習交流。嚴禁抄襲作為個人作業或專題繳交，詳細規範請參閱 [LICENSE.md](https://github.com/zhuj05/nou-study-tools/tree/main?tab=License-1-ov-file)
+
+
+<h3 align=left>Support</h3>
+<a href="https://www.buymeacoffee.com/zhuj70553" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>

@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+version: 2
+language: "zh-TW"
+
+reviews:
+  high_level_summary: true
+  walkthrough: true
+  profile: "chill"
+
+chat:
+  auto_reply: true
