@@ -5,7 +5,18 @@ import json
 from pathlib import Path
 from typing import NamedTuple
 import flet as ft
-
+from domain.grades import (
+    GPA_40_SCALE,
+    GPA_43_SCALE,
+    GradeCalculationError,
+    calculate_average_grade,
+    
+    calculate_gpa_43,
+    calculate_grade,
+    calculate_target_final_score,
+    format_grade_result,
+    grade_details,
+)
 # 項目格式: (名稱, 連結, 背景顏色, 文字顏色)
 SHORTCUTS: list[tuple[str, str, str, str]] = [
     ("空大首頁", "https://www.nou.edu.tw/", "#E6FFFA", "#006D5B"),
