@@ -8,6 +8,38 @@
 
 ---
 
+## 項目目錄
+```
+nou-study-tools/
+├── .github
+│   ├── workflows
+│   │   └── deploy.yml
+│   └── dependabot.yml
+├── assets
+│   ├── google7aa03728a73fed37.html
+│   ├── icon.png
+│   └── icon.svg
+├── views
+│   └── calculator.py
+├── web
+│   ├── index.html
+│   ├── robots.txt
+│   ├── sitemap.xml
+│   └── sw.js
+├── .coderabbit.yaml
+├── .gitignore
+├── calendar_data.json
+├── calendar_data.template.json
+├── google7aa03728a73fed37.html
+├── LICENSE.md
+├── main.py
+├── models.py
+├── pyproject.toml
+├── README.md
+├── requirements.txt
+└── TERMS_OF_USE.md
+```
+
 ## 🌟 核心特色
 
 - **免帳密零風險**：不索取學號、密碼與個人隱私，使用安全無顧慮。
