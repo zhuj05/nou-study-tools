@@ -17,7 +17,8 @@ def load_calendar_data() -> dict[str, dict]:
     try:
         with open(json_path, "r", encoding="utf-8") as f:
             raw_data = json.load(f)
-    except Exception:
+    except (OSError, json.JSONDecodeError) as exc:
+        logging.getLogger(__name__).warning("無法載入 calendar_data.json: %s", exc)
         return {}
 
     parsed_data = {}

@@ -2,6 +2,7 @@
 
 import math
 from domain.grades import (
+    TargetStatus, 
     calculate_average_grade,
     calculate_gpa_43,
     calculate_grade,
@@ -40,7 +41,8 @@ def evaluate_single_course(
     # ---------------------------------------------------------
     if final is None:
         target_res = calculate_target_final_score(regular, midterm)
-
+        
+        
         if is_summer:
             current_acc = regular * 0.3
             calc_default = (60.0 - current_acc) / 0.7
@@ -63,7 +65,7 @@ def evaluate_single_course(
                 )
                 return msg, False
             else:
-                needed_ceil = math.ceil(target_score * 10) / 10
+                needed_ceil = math.ceil(round(target_score * 10, 6)) / 10
                 msg = (
                     f"📊【暑修 期末考及格目標試算】\n"
                     f"• 目前平時成績（30%）：{regular:.1f} 分（已得 {current_acc:.2f} 分）\n"
@@ -98,7 +100,7 @@ def evaluate_single_course(
             )
             return msg, False
         else:
-            needed_ceil = math.ceil(target_score * 10) / 10
+            needed_ceil = math.ceil(round(target_score * 10, 6)) / 10
             msg = (
                 f"📊【非暑修 期末考及格目標試算】\n"
                 f"• 平時成績（30%）：{regular:.1f} 分\n"

@@ -33,14 +33,16 @@ async def set_clipboard_universal(page: ft.Page, text: str) -> bool:
         import js
 
         if hasattr(js, "navigator") and hasattr(js.navigator, "clipboard"):
-            js.navigator.clipboard.writeText(text)
+            #js.navigator.clipboard.writeText(text)
+            await js.navigator.clipboard.writeText(text)
             return True
         elif (
             hasattr(js, "window")
             and hasattr(js.window, "navigator")
             and hasattr(js.window.navigator, "clipboard")
         ):
-            js.window.navigator.clipboard.writeText(text)
+            #js.window.navigator.clipboard.writeText(text)
+            await js.window.navigator.clipboard.writeText(text)
             return True
     except Exception:
         pass

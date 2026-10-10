@@ -6,7 +6,6 @@ from infrastructure.calendar_loader import load_calendar_data
 
 ACADEMIC_CALENDAR_DATA: dict[str, dict] = load_calendar_data()
 
-
 def build_academic_calendar_view(page: ft.Page) -> ft.Container:
     """建構重要行事曆畫面。"""
     today = datetime.date.today()
