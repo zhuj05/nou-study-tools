@@ -9,52 +9,11 @@ if str(ROOT_DIR) not in sys.path:
 
 import flet as ft
 
-
-async def set_clipboard_universal(page: ft.Page, text: str) -> bool:
-    """全相容跨版本剪貼簿複製常式 (相容 Flet 1.0+、舊版 Flet 與 Pyodide/瀏覽器環境)"""
-    if hasattr(page, "clipboard") and page.clipboard is not None:
-        try:
-            if hasattr(page.clipboard, "set_async"):
-                await page.clipboard.set_async(text)
-                return True
-            elif hasattr(page.clipboard, "set"):
-                page.clipboard.set(text)
-                return True
-        except Exception:
-            pass
-
-    if hasattr(page, "set_clipboard_async"):
-        try:
-            await page.set_clipboard_async(text)
-            return True
-        except Exception:
-            pass
-    if hasattr(page, "set_clipboard"):
-        try:
-            page.set_clipboard(text)
-            return True
-        except Exception:
-            pass
-
-    try:
-        import js
-
-        if hasattr(js, "navigator") and hasattr(js.navigator, "clipboard"):
-            js.navigator.clipboard.writeText(text)
-            return True
-        elif (
-            hasattr(js, "window")
-            and hasattr(js.window, "navigator")
-            and hasattr(js.window.navigator, "clipboard")
-        ):
-            js.window.navigator.clipboard.writeText(text)
-            return True
-    except Exception:
-        pass
-
-    return False
-
-
+from infrastructure.clipboard import set_clipboard_universal
+from services.tracker_export import (
+    export_tracker_to_csv,
+    export_tracker_to_line,
+)
 from models import (
     SHORTCUTS,
     build_academic_calendar_view,
@@ -76,7 +35,7 @@ class GradeCalculator(ft.Column):
 
         # 右上角「功能特色」按鈕
         self.features_btn = ft.TextButton(
-            content="功能特色",
+            content="功能特色與使用說明",
             icon=ft.Icons.INFO_OUTLINE,
             icon_color="#3B82F6",
             on_click=self.show_features_dialog,
@@ -492,7 +451,6 @@ class GradeCalculator(ft.Column):
                                 ],
                             ),
                         ),
-                        # 📲 新增：加入手機桌面 (PWA) 與電腦書籤教學
                         ft.Container(
                             padding=14,
                             border_radius=8,
@@ -1107,114 +1065,55 @@ class GradeCalculator(ft.Column):
             "time_presets": time_presets,
         }
 
-    def _format_exam_line(
-        self,
-        preset_key: str,
-        start_d: str,
-        end_d: str,
-        sh: str,
-        sm: str,
-        eh: str,
-        em: str,
-        presets_dict: dict,
-    ) -> str:
-        if not start_d and not end_d:
-            return ""
-
-        date_str = start_d or end_d
-        if start_d and end_d and start_d != end_d:
-            date_range = f"{start_d} 至 {end_d}"
-        else:
-            date_range = date_str
-
-        if preset_key in presets_dict:
-            title, time_info, _, _, _, _ = presets_dict[preset_key]
-            if preset_key == "online_deadline":
-                return f"{date_range}（{time_info}）"
-            return f"{date_range} {title} ({time_info})"
-
-        start_part = f"{start_d} {sh}:{sm}" if start_d else ""
-        end_part = f"{end_d} {eh}:{em}" if end_d else ""
-        if start_part and end_part:
-            return f"{start_part} 至 {end_part}"
-        return start_part or end_part
-
     def show_toast(self, message: str, color: str):
         if self.page:
             self.page.snack_bar = ft.SnackBar(ft.Text(message), bgcolor=color)
             self.page.snack_bar.open = True
             self.page.update()
 
+    def _extract_tracker_raw_data(self) -> list[dict]:
+        extracted = []
+        for item in self.tracker_cards_data:
+            extracted.append({
+                "subject": (item["subject"].value or "").strip(),
+                "midterm_preset": item["midterm_preset"].value,
+                "midterm_start_date": (item["midterm_start_date"].value or "").strip(),
+                "midterm_start_h": item["midterm_start_h"].value,
+                "midterm_start_m": item["midterm_start_m"].value,
+                "midterm_end_date": (item["midterm_end_date"].value or "").strip(),
+                "midterm_end_h": item["midterm_end_h"].value,
+                "midterm_end_m": item["midterm_end_m"].value,
+                "final_preset": item["final_preset"].value,
+                "final_start_date": (item["final_start_date"].value or "").strip(),
+                "final_start_h": item["final_start_h"].value,
+                "final_start_m": item["final_start_m"].value,
+                "final_end_date": (item["final_end_date"].value or "").strip(),
+                "final_end_h": item["final_end_h"].value,
+                "final_end_m": item["final_end_m"].value,
+                "hw1_date": (item["hw1_date"].value or "").strip(),
+                "hw1": item["hw1"].value or "未完成",
+                "hw2_date": (item["hw2_date"].value or "").strip(),
+                "hw2": item["hw2"].value or "未完成",
+                "memo": (item["memo"].value or "").strip(),
+                "time_presets": item["time_presets"],
+            })
+        return extracted
+
+    def _close_dialog(self, dialog: ft.AlertDialog):
+        """相容各版本之對話框關閉方法。"""
+        dialog.open = False
+        self.page.update()
+
     def export_to_line(self, _):
-        lines = [
-            "📚 空大學期考試與作業進度紀錄",
-            "========================",
-        ]
+        data = self._extract_tracker_raw_data()
+        line_text = export_tracker_to_line(data)
 
-        has_data = False
-        for idx, item in enumerate(self.tracker_cards_data, start=1):
-            subject = (item["subject"].value or "").strip()
-            presets = item["time_presets"]
-
-            midterm_str = self._format_exam_line(
-                item["midterm_preset"].value,
-                (item["midterm_start_date"].value or "").strip(),
-                (item["midterm_end_date"].value or "").strip(),
-                item["midterm_start_h"].value,
-                item["midterm_start_m"].value,
-                item["midterm_end_h"].value,
-                item["midterm_end_m"].value,
-                presets,
-            )
-            final_str = self._format_exam_line(
-                item["final_preset"].value,
-                (item["final_start_date"].value or "").strip(),
-                (item["final_end_date"].value or "").strip(),
-                item["final_start_h"].value,
-                item["final_start_m"].value,
-                item["final_end_h"].value,
-                item["final_end_m"].value,
-                presets,
-            )
-            hw1_date = (item["hw1_date"].value or "").strip()
-            hw1_status = item["hw1"].value or "未完成"
-            hw2_date = (item["hw2_date"].value or "").strip()
-            hw2_status = item["hw2"].value or "未完成"
-            memo = (item["memo"].value or "").strip()
-
-            if (
-                subject
-                or midterm_str
-                or final_str
-                or hw1_date
-                or hw2_date
-                or memo
-            ):
-                has_data = True
-                display_title = subject if subject else f"科目 {idx}"
-                lines.append(f"【{display_title}】")
-                if midterm_str:
-                    lines.append(f"• 期中考：{midterm_str}")
-                if final_str:
-                    lines.append(f"• 期末考：{final_str}")
-                if hw1_date or hw1_status != "未完成":
-                    date_info = f"（截止日：{hw1_date}）" if hw1_date else ""
-                    lines.append(f"• 作業 1：{hw1_status} {date_info}")
-                if hw2_date or hw2_status != "未完成":
-                    date_info = f"（截止日：{hw2_date}）" if hw2_date else ""
-                    lines.append(f"• 作業 2：{hw2_status} {date_info}")
-                if memo:
-                    lines.append(f"• 備註：{memo}")
-                lines.append("------------------------")
-
-        if not has_data:
+        if not line_text:
             self.show_toast(
                 "請至少填寫一門科目的資料再進行複製！",
                 ft.Colors.ORANGE_700,
             )
             return
-
-        line_text = "\n".join(lines)
 
         export_textfield = ft.TextField(
             value=line_text,
@@ -1238,13 +1137,7 @@ class GradeCalculator(ft.Column):
                     "瀏覽器安全性限制，請點擊上方框內全選複製。",
                     ft.Colors.ORANGE_700,
                 )
-
-            dialog.open = False
-            self.page.update()
-
-        def close_dialog(_):
-            dialog.open = False
-            self.page.update()
+            self._close_dialog(dialog)
 
         dialog = ft.AlertDialog(
             title=ft.Row(
@@ -1271,7 +1164,7 @@ class GradeCalculator(ft.Column):
                     color="#FFFFFF",
                     on_click=copy_content,
                 ),
-                ft.Button(content="關閉", on_click=close_dialog),
+                ft.Button(content="關閉", on_click=lambda _: self._close_dialog(dialog)),
             ],
             actions_alignment=ft.MainAxisAlignment.END,
         )
@@ -1281,77 +1174,15 @@ class GradeCalculator(ft.Column):
         self.page.update()
 
     def export_to_excel(self, _):
-        headers = [
-            "科目名稱",
-            "期中考日程",
-            "期末考日程",
-            "作業1截止日",
-            "作業1狀態",
-            "作業2截止日",
-            "作業2狀態",
-            "備註",
-        ]
-        rows = [headers]
+        data = self._extract_tracker_raw_data()
+        csv_text = export_tracker_to_csv(data)
 
-        has_data = False
-        for item in self.tracker_cards_data:
-            subject = (item["subject"].value or "").strip()
-            presets = item["time_presets"]
-
-            m_str = self._format_exam_line(
-                item["midterm_preset"].value,
-                (item["midterm_start_date"].value or "").strip(),
-                (item["midterm_end_date"].value or "").strip(),
-                item["midterm_start_h"].value,
-                item["midterm_start_m"].value,
-                item["midterm_end_h"].value,
-                item["midterm_end_m"].value,
-                presets,
-            )
-            f_str = self._format_exam_line(
-                item["final_preset"].value,
-                (item["final_start_date"].value or "").strip(),
-                (item["final_end_date"].value or "").strip(),
-                item["final_start_h"].value,
-                item["final_start_m"].value,
-                item["final_end_h"].value,
-                item["final_end_m"].value,
-                presets,
-            )
-
-            hw1_date = (item["hw1_date"].value or "").strip()
-            hw1_status = item["hw1"].value or "未完成"
-            hw2_date = (item["hw2_date"].value or "").strip()
-            hw2_status = item["hw2"].value or "未完成"
-            memo = (item["memo"].value or "").strip().replace("\n", " ")
-
-            if subject or m_str or f_str or hw1_date or hw2_date or memo:
-                has_data = True
-
-                def escape_csv(val: str) -> str:
-                    if "," in val or '"' in val:
-                        return f'"{val.replace('"', '""')}"'
-                    return val
-
-                rows.append([
-                    escape_csv(subject),
-                    escape_csv(m_str),
-                    escape_csv(f_str),
-                    escape_csv(hw1_date),
-                    escape_csv(hw1_status),
-                    escape_csv(hw2_date),
-                    escape_csv(hw2_status),
-                    escape_csv(memo),
-                ])
-
-        if not has_data:
+        if not csv_text:
             self.show_toast(
                 "請至少填寫一門科目的資料再進行匯出！",
                 ft.Colors.ORANGE_700,
             )
             return
-
-        csv_text = "\n".join([",".join(row) for row in rows])
 
         export_textfield = ft.TextField(
             value=csv_text,
@@ -1375,13 +1206,7 @@ class GradeCalculator(ft.Column):
                     "瀏覽器安全性限制，請點擊上方框內全選複製。",
                     ft.Colors.ORANGE_700,
                 )
-
-            dialog.open = False
-            self.page.update()
-
-        def close_dialog(_):
-            dialog.open = False
-            self.page.update()
+            self._close_dialog(dialog)
 
         dialog = ft.AlertDialog(
             title=ft.Text("匯出進度紀錄 (CSV/Excel)", weight=ft.FontWeight.BOLD),
@@ -1408,7 +1233,7 @@ class GradeCalculator(ft.Column):
                     color="#FFFFFF",
                     on_click=copy_content,
                 ),
-                ft.Button(content="關閉", on_click=close_dialog),
+                ft.Button(content="關閉", on_click=lambda _: self._close_dialog(dialog)),
             ],
             actions_alignment=ft.MainAxisAlignment.END,
         )
@@ -1520,7 +1345,6 @@ class GradeCalculator(ft.Column):
 
         self.tracker_panel.visible = is_tracker
 
-        # 當切換到行事曆時動態載入元件
         if is_calendar:
             self.calendar_panel.content = build_academic_calendar_view(
                 self.page
@@ -1529,7 +1353,6 @@ class GradeCalculator(ft.Column):
         else:
             self.calendar_panel.visible = False
 
-        # 行事曆或作業紀錄模式下隱藏算分按鈕與成績卡片
         self.action_buttons.visible = not is_tracker and not is_calendar
         self.result_box.visible = not is_tracker and not is_calendar
 
@@ -1631,11 +1454,8 @@ class GradeCalculator(ft.Column):
             self.regular.error_text = "需介於 0 到 100 分"
             raise ValueError("平時成績須介於 0 到 100 分之間。")
 
-        # -------------------------------------------------------------
         # 情境 A：暑修模式 (平時 30% + 期末 70%)
-        # -------------------------------------------------------------
         if self.semester.value == "summer":
-            # 使用者未輸入期末考成績 -> 試算及格門檻
             if not final_val:
                 needed = (60.0 - reg_score * 0.3) / 0.7
                 if needed <= 0:
@@ -1667,7 +1487,6 @@ class GradeCalculator(ft.Column):
                     self.show_result(msg, True)
                 return
 
-            # 有填寫期末考成績 -> 正常計算學期成績
             try:
                 fin_score = float(final_val)
             except ValueError:
@@ -1683,9 +1502,7 @@ class GradeCalculator(ft.Column):
             )
             return
 
-        # -------------------------------------------------------------
         # 情境 B：非暑修模式 (平時 30% + 期中 30% + 期末 40%)
-        # -------------------------------------------------------------
         if not midterm_val:
             self.midterm.error_text = "請輸入期中考成績"
             raise ValueError("請輸入期中考成績。")
@@ -1700,7 +1517,6 @@ class GradeCalculator(ft.Column):
             self.midterm.error_text = "需介於 0 到 100 分"
             raise ValueError("期中考成績須介於 0 到 100 分之間。")
 
-        # 使用者只有輸入平時成績和期中考成績（期末考未填）-> 試算期末考需要幾分及格
         if not final_val:
             accumulated = reg_score * 0.3 + mid_score * 0.3
             needed = (60.0 - accumulated) / 0.4
@@ -1737,7 +1553,6 @@ class GradeCalculator(ft.Column):
                 self.show_result(msg, True)
             return
 
-        # 若使用者三個欄位皆填寫 -> 正常計算學期總成績
         try:
             fin_score = float(final_val)
         except ValueError:
