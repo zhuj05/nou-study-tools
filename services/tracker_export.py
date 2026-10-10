@@ -39,45 +39,52 @@ def format_exam_line(
 
 
 def _has_meaningful_data(item: dict[str, Any]) -> tuple[bool, str, str]:
-    """判斷單門科目是否有實際填寫有效內容 (排除預設下拉狀態)。"""
-    subject = item.get("subject", "").strip()
+    """嚴格判斷科目是否有實質輸入（忽略預設的下拉選單狀態）。"""
+    subject = (item.get("subject") or "").strip()
     presets = item.get("time_presets", {})
+
+    m_start = (item.get("midterm_start_date") or "").strip()
+    m_end = (item.get("midterm_end_date") or "").strip()
+    f_start = (item.get("final_start_date") or "").strip()
+    f_end = (item.get("final_end_date") or "").strip()
 
     midterm_str = format_exam_line(
         item.get("midterm_preset", "period_1"),
-        item.get("midterm_start_date", "").strip(),
-        item.get("midterm_end_date", "").strip(),
+        m_start,
+        m_end,
         item.get("midterm_start_h", "08"),
         item.get("midterm_start_m", "30"),
         item.get("midterm_end_h", "09"),
         item.get("midterm_end_m", "40"),
         presets,
-    )
+    ) if (m_start or m_end) else ""
+
     final_str = format_exam_line(
         item.get("final_preset", "period_1"),
-        item.get("final_start_date", "").strip(),
-        item.get("final_end_date", "").strip(),
+        f_start,
+        f_end,
         item.get("final_start_h", "08"),
         item.get("final_start_m", "30"),
         item.get("final_end_h", "09"),
         item.get("final_end_m", "40"),
         presets,
-    )
-    hw1_date = item.get("hw1_date", "").strip()
-    hw1_status = item.get("hw1", "未完成")
-    hw2_date = item.get("hw2_date", "").strip()
-    hw2_status = item.get("hw2", "未完成")
-    memo = item.get("memo", "").strip()
+    ) if (f_start or f_end) else ""
 
-    # 只有當使用者有填名稱、考試日期、作業日期、非預設狀態或備註時才算有資料
+    hw1_date = (item.get("hw1_date") or "").strip()
+    hw1_status = item.get("hw1", "未完成") or "未完成"
+    hw2_date = (item.get("hw2_date") or "").strip()
+    hw2_status = item.get("hw2", "未完成") or "未完成"
+    memo = (item.get("memo") or "").strip()
+
+    # 嚴格條件：只有科目有字、有選日期、作業狀態不是「未完成」、或有備註時，才算有填
     has_data = bool(
         subject
-        or midterm_str
-        or final_str
+        or (m_start or m_end)
+        or (f_start or f_end)
         or hw1_date
-        or hw1_status != "未完成"
+        or (hw1_status != "未完成")
         or hw2_date
-        or hw2_status != "未完成"
+        or (hw2_status != "未完成")
         or memo
     )
     return has_data, midterm_str, final_str

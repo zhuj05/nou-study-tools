@@ -14,15 +14,13 @@ from services.tracker_export import (
     export_tracker_to_csv,
     export_tracker_to_line,
 )
-from models import (
-    SHORTCUTS,
-    build_academic_calendar_view,
-    calculate_average_grade,
-    calculate_gpa_43,
-    calculate_grade,
-    format_grade_result,
-)
 
+from models import SHORTCUTS, build_academic_calendar_view
+
+from services.grade_service import (
+    evaluate_semester_average,
+    evaluate_single_course,
+)
 
 class GradeCalculator(ft.Column):
 
@@ -1066,8 +1064,17 @@ class GradeCalculator(ft.Column):
         }
 
     def show_toast(self, message: str, color: str):
-        if self.page:
-            self.page.snack_bar = ft.SnackBar(ft.Text(message), bgcolor=color)
+        if not self.page:
+            return
+        snack = ft.SnackBar(
+            content=ft.Text(message, color=ft.Colors.WHITE),
+            bgcolor=color,
+        )
+        # 相容 Flet 新舊版本 API
+        if hasattr(self.page, "open"):
+            self.page.open(snack)
+        else:
+            self.page.snack_bar = snack
             self.page.snack_bar.open = True
             self.page.update()
 
@@ -1439,6 +1446,7 @@ class GradeCalculator(ft.Column):
         regular_val = (self.regular.value or "").strip()
         final_val = (self.final.value or "").strip()
         midterm_val = (self.midterm.value or "").strip()
+        is_summer = self.semester.value == "summer"
 
         if not regular_val:
             self.regular.error_text = "請輸入平時成績"
@@ -1454,118 +1462,39 @@ class GradeCalculator(ft.Column):
             self.regular.error_text = "需介於 0 到 100 分"
             raise ValueError("平時成績須介於 0 到 100 分之間。")
 
-        # 情境 A：暑修模式 (平時 30% + 期末 70%)
-        if self.semester.value == "summer":
-            if not final_val:
-                needed = (60.0 - reg_score * 0.3) / 0.7
-                if needed <= 0:
-                    msg = (
-                        f"📊【期末考及格目標試算】\n"
-                        f"• 目前平時成績（30%）：{reg_score:.1f} 分\n"
-                        f"• 目前累積得分：{reg_score * 0.3:.2f} 分\n"
-                        f"🎉 目前成績已非常穩健，期末考即使考 0 分也能順利及格！"
-                    )
-                    self.show_result(msg, True)
-                elif needed > 100.0:
-                    needed_rounded = round(needed, 1)
-                    msg = (
-                        f"📊【期末考及格目標試算】\n"
-                        f"• 目前平時成績（30%）：{reg_score:.1f} 分\n"
-                        f"• 期末考需要考取：{needed_rounded:.1f} 分\n"
-                        f"⚠️ 期末考即使考滿分 100 分，總分仍無法達到 60 分及格門檻。"
-                    )
-                    self.show_result(msg, False)
-                else:
-                    needed_ceil = math.ceil(needed * 10) / 10
-                    current_acc = reg_score * 0.3
-                    msg = (
-                        f"📊【暑修 期末考及格目標試算】\n"
-                        f"• 目前平時成績（30%）：{reg_score:.1f} 分（已得 {current_acc:.2f} 分）\n"
-                        f"• 🎯 期末考（70%）至少需要考：{needed_ceil:.1f} 分 才能達到 60 分及格門檻！\n"
-                        f"（期末考滿分 100 分，祝考試順利順暢通關！）"
-                    )
-                    self.show_result(msg, True)
-                return
+        mid_score: float | None = None
+        if not is_summer:
+            if not midterm_val:
+                self.midterm.error_text = "請輸入期中考成績"
+                raise ValueError("請輸入期中考成績。")
+            try:
+                mid_score = float(midterm_val)
+            except ValueError:
+                self.midterm.error_text = "請輸入有效數字"
+                raise ValueError("期中考成績請輸入有效數字。")
+            if not (0.0 <= mid_score <= 100.0):
+                self.midterm.error_text = "需介於 0 到 100 分"
+                raise ValueError("期中考成績須介於 0 到 100 分之間。")
 
+        fin_score: float | None = None
+        if final_val:
             try:
                 fin_score = float(final_val)
             except ValueError:
                 self.final.error_text = "請輸入有效數字"
                 raise ValueError("期末考成績請輸入有效數字。")
+            if not (0.0 <= fin_score <= 100.0):
+                self.final.error_text = "需介於 0 到 100 分"
+                raise ValueError("期末考成績須介於 0 到 100 分之間。")
 
-            total, letter, gpa, passed = calculate_grade(reg_score, fin_score)
-            self.show_result(
-                format_grade_result(
-                    total, letter, gpa, passed, "暑修學期總成績"
-                ),
-                passed,
-            )
-            return
-
-        # 情境 B：非暑修模式 (平時 30% + 期中 30% + 期末 40%)
-        if not midterm_val:
-            self.midterm.error_text = "請輸入期中考成績"
-            raise ValueError("請輸入期中考成績。")
-
-        try:
-            mid_score = float(midterm_val)
-        except ValueError:
-            self.midterm.error_text = "請輸入有效數字"
-            raise ValueError("期中考成績請輸入有效數字。")
-
-        if not (0.0 <= mid_score <= 100.0):
-            self.midterm.error_text = "需介於 0 到 100 分"
-            raise ValueError("期中考成績須介於 0 到 100 分之間。")
-
-        if not final_val:
-            accumulated = reg_score * 0.3 + mid_score * 0.3
-            needed = (60.0 - accumulated) / 0.4
-            if needed <= 0:
-                msg = (
-                    f"📊【期末考及格目標試算】\n"
-                    f"• 平時成績（30%）：{reg_score:.1f} 分\n"
-                    f"• 期中考成績（30%）：{mid_score:.1f} 分\n"
-                    f"• 前兩項累積得分：{accumulated:.2f} 分（已達 60 分門檻）\n"
-                    f"🎉 恭喜！目前累積得分已達標，期末考即使考 0 分也確定順利及格！"
-                )
-                self.show_result(msg, True)
-            elif needed > 100.0:
-                needed_rounded = round(needed, 1)
-                msg = (
-                    f"📊【期末考及格目標試算】\n"
-                    f"• 平時成績（30%）：{reg_score:.1f} 分\n"
-                    f"• 期中考成績（30%）：{mid_score:.1f} 分\n"
-                    f"• 目前累積得分：{accumulated:.2f} 分\n"
-                    f"• 期末考所需分數：{needed_rounded:.1f} 分\n"
-                    f"⚠️ 期末考即使考滿分 100 分，總分仍無法達到 60 分及格門檻，請務必掌握作業或面授加分機會。"
-                )
-                self.show_result(msg, False)
-            else:
-                needed_ceil = math.ceil(needed * 10) / 10
-                msg = (
-                    f"📊【非暑修 期末考及格目標試算】\n"
-                    f"• 平時成績（30%）：{reg_score:.1f} 分\n"
-                    f"• 期中考成績（30%）：{mid_score:.1f} 分\n"
-                    f"• 目前累積得分：{accumulated:.2f} 分\n"
-                    f"• 🎯 期末考（40%）至少需要考：{needed_ceil:.1f} 分 才能達到 60 分及格門檻！\n"
-                    f"（請提早複習備戰，加油！）"
-                )
-                self.show_result(msg, True)
-            return
-
-        try:
-            fin_score = float(final_val)
-        except ValueError:
-            self.final.error_text = "請輸入有效數字"
-            raise ValueError("期末考成績請輸入有效數字。")
-
-        total, letter, gpa, passed = calculate_grade(
-            reg_score, fin_score, mid_score
+        # 呼叫業務服務層取得運算與訊息
+        msg, passed = evaluate_single_course(
+            regular=reg_score,
+            final=fin_score,
+            midterm=mid_score,
+            is_summer=is_summer,
         )
-        self.show_result(
-            format_grade_result(total, letter, gpa, passed, "學期總成績"),
-            passed,
-        )
+        self.show_result(msg, passed)
 
     def calculate_semester_average(self):
         courses = []
@@ -1597,16 +1526,5 @@ class GradeCalculator(ft.Column):
             self.show_result("請至少輸入一科成績與學分。")
             return
 
-        total_score, average, letter, gpa, passed = calculate_average_grade(
-            courses
-        )
-        letter_43, gpa_43 = calculate_gpa_43(average)
-        self.show_result(
-            f"已計算 {len(courses)} 科成績\n"
-            f"科目成績加總：{total_score:.1f} 分\n"
-            + format_grade_result(
-                average, letter, gpa, passed, "學期成績平均"
-            )
-            + f"\nGPA（4.3 制）：{letter_43}，積點：{gpa_43:.1f}",
-            passed,
-        )
+        msg, passed = evaluate_semester_average(courses)
+        self.show_result(msg, passed)
