@@ -30,8 +30,6 @@
 
 # Source-Available License & Terms of Use
 
-# Source-Available License & Terms of Use
-
 Copyright (c) 2026 朱家儀 (Jia-Yi Zhu). All rights reserved.
 
 Permission is hereby granted to any person obtaining a copy of this software and associated documentation files (the "Software"), to use, copy, modify, and distribute the Software for non-commercial purposes only, subject to the following conditions:
