@@ -19,8 +19,18 @@ nou-study-tools/
 │   ├── google7aa03728a73fed37.html
 │   ├── icon.png
 │   └── icon.svg
+├── domain
+│   ├── __init__.py
+│   └── grades.py
+├── infrastructure
+│   ├── calendar_loader.py
+│   └── clipboard.py
+├── services
+│   ├── grade_service.py
+│   └── tracker_export.py
 ├── views
-│   └── calculator.py
+│   ├── calculator.py
+│   └── calendar_view.py
 ├── web
 │   ├── index.html
 │   ├── robots.txt
