@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@v7
@@ -46,6 +48,9 @@ jobs:
       - name: Copy SEO and Verification Files
         run: |
           cp "$GITHUB_WORKSPACE/google7aa03728a73fed37.html" build/web/
+          cp "$GITHUB_WORKSPACE/web/index.html" build/web/
+          sed -i 's|\$FLUTTER_BASE_HREF|/nou-study-tools/|g' build/web/index.html
+          cp "$GITHUB_WORKSPACE/web/sw.js" build/web/
           cp "$GITHUB_WORKSPACE/web/robots.txt" build/web/
           cp "$GITHUB_WORKSPACE/web/sitemap.xml" build/web/
 
@@ -57,6 +62,9 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+     pages: write
+     id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
