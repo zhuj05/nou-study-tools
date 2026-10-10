@@ -2,7 +2,7 @@
 
 **Copyright (c) 2026 朱家儀 (Jia-Yi Zhu). All rights reserved.**
 
-[![License](https://img.shields.io/badge/License-Source--Available_Non--Commercial-blue.svg)](LICENSE.md)
+[![License](https://img.shields.io/badge/License-All_Rights_Reserved-red.svg)](#-版權與授權宣告-license)
 
 ---
 
